@@ -1,0 +1,11 @@
+mkdir  d:\cjo\git
+cd  d:\cjo\git
+touch  a.md
+
+## 注：在进行任何 Git 操作之前，都要先切换到 Git 仓库目录，也就是先要先切换到项目的文件夹目录下。
+
+## 初始化仓库
+git init
+
+## 查看状态
+git status
