@@ -9,3 +9,19 @@ git init
 
 ## 查看状态
 git status
+
+## 添加文件，先将文件放到缓冲区
+git add a.md
+git add study-note
+
+## 修改配置文件
+git config --global user.email "CJo_126@126.com"
+git config --global user.name  "CongJun"
+## 查看配置信息
+git config -l
+
+## 提交第一次修改
+git commit -m "first commit"
+
+## 查看所有产生commit的记录
+git log
