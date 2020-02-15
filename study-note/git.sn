@@ -13,6 +13,7 @@ git status
 ## 添加文件，先将文件放到缓冲区
 git add a.md
 git add study-note
+git add .
 
 ## 修改配置文件
 git config --global user.email "CJo_126@126.com"
