@@ -83,5 +83,23 @@ git  reset  --hard commit_id
 git reflog
 
 
+# 生成id_rsa和id_rsa.pub
+ssh-keygen -t rsa -C "CJo_126@126.com"
+## 注：将id_rsa.pub文件的内容添加到https://github.com/中
+# 创建一个新的仓库learngit99
+
+
+# 关联一个远程库
+git remote add origin git@github.com:CongJun/learngit99.git
+origin：远程库的名字，git的默认叫法，可以更换
+CongJun：GitHub上的用户名
+learngit99：GitHub上创建的仓库（repo）
+
+# 第一次推送master/study分支的所有内容
+git push -u origin master
+git push -u origin study
+## 以后推送master/study分支的所有内容
+git push origin master
+git push origin study
 
 
