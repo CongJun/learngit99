@@ -26,6 +26,11 @@ git add a.md
 git add study-note
 git add .
 
+# 删除文件
+rm test  # os
+git rm test
+git commit -m "remove test file"
+
 ## 修改配置文件
 git config --global user.email "CJo_126@126.com"
 git config --global user.name  "CongJun"
