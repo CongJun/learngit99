@@ -13,6 +13,7 @@ git status
 ## 添加文件，先将文件放到缓冲区
 git add a.md
 git add study-note
+git add .
 
 ## 修改配置文件
 git config --global user.email "CJo_126@126.com"
@@ -25,3 +26,23 @@ git commit -m "first commit"
 
 ## 查看所有产生commit的记录
 git log
+
+## 查看/创建/删除分支
+git branch
+git branch study
+git branch -d study
+git branch -D study
+
+## 查看/创建 版本
+git tag
+git tag v0.1
+
+# 切换分支/版本
+git checkout study
+git checkout v0.1
+## 退回到文件修改前的状态
+git checkout study-note\git.sn
+
+# 查看有哪些修改
+git  diff  study-note\git.sn
+
