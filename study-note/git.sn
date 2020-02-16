@@ -55,8 +55,10 @@ git checkout v0.1
 git checkout study-note\git.sn
 ## 创建一个新分支并切换到该分支
 git checkout -b newbranch
-## 丢弃工作区的修改
+## 丢弃工作区的修改(还没有add)
 git checkout -- study-note\git.sn
+## 把暂存区的修改撤销掉（unstage），重新放回工作区(已add,还没有commit，没有add的无法checkout)
+git reset HEAD study-note\git.sn
 
 ## 合并其他分支到master分支
 git merge
