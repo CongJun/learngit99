@@ -26,3 +26,25 @@ git commit -m "first commit"
 
 ## 查看所有产生commit的记录
 git log
+
+## 创建分支
+git branch study
+# 删除study分支
+git branch -d study
+# 强制删除study分支
+git branch -D study
+
+## 切换到study分支，切换到v0.1标签
+git checkout study
+git checkout v0.1
+
+## 创建一个新分支并切换到该分支
+git checkout -b newbranch
+
+## 合并其他分支到master分支
+git merge
+# 注：当前分支必须是master
+
+## 打标签
+git tag
+git tag v0.1
