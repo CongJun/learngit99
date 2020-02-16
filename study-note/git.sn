@@ -27,17 +27,21 @@ git commit -m "first commit"
 ## 查看所有产生commit的记录
 git log
 
-## 创建分支
+## 查看/创建/删除分支
+git branch
 git branch study
-# 删除study分支
 git branch -d study
-# 强制删除study分支
 git branch -D study
 
-## 切换到study分支，切换到v0.1标签
+## 查看/创建 版本
+git tag
+git tag v0.1
+
+# 切换分支/版本
 git checkout study
 git checkout v0.1
-
+## 退回到文件修改前的状态
+git checkout study-note\git.sn
 ## 创建一个新分支并切换到该分支
 git checkout -b newbranch
 
@@ -45,6 +49,6 @@ git checkout -b newbranch
 git merge
 # 注：当前分支必须是master
 
-## 打标签
-git tag
-git tag v0.1
+# 查看有哪些修改
+git  diff  study-note\git.sn
+
