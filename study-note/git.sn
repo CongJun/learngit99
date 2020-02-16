@@ -1,3 +1,6 @@
+Git是目前世界上最先进的分布式版本控制系统（没有之一）。
+Git跟踪并管理的是修改，而非文件。
+
 mkdir  d:\cjo\git
 cd  d:\cjo\git
 touch  a.md
@@ -59,6 +62,8 @@ git merge
 
 # 查看有哪些修改
 git  diff  study-note\git.sn
+## 查看git.sn文件在工作区和版本库的区别
+git  diff  HEAD  --  study-note\git.sn
 
 # 退回到指定版本
 git  reset  --hard HEAD^
