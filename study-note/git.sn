@@ -2,6 +2,14 @@ mkdir  d:\cjo\git
 cd  d:\cjo\git
 touch  a.md
 
+# 工作区（Working Directory）
+d:\cjo\git
+# 版本库（Repository）
+d:\cjo\git\.git
+## stage(index)：暂存区，用git add命令添加
+## master，用git commit把暂存区的所有内容添加到当前分支
+## HEAD：指向master的一个指针
+
 ## 注：在进行任何 Git 操作之前，都要先切换到 Git 仓库目录，也就是先要先切换到项目的文件夹目录下。
 
 ## 初始化仓库
@@ -51,4 +59,15 @@ git merge
 
 # 查看有哪些修改
 git  diff  study-note\git.sn
+
+# 退回到指定版本
+git  reset  --hard HEAD^
+# 注：上一个版本就是HEAD^，上上一个版本就是HEAD^^，当然往上100个版本写100个^比较容易数不过来，所以写成HEAD~100。
+git  reset  --hard commit_id
+
+# 查看执行过了每一条命令（可以查找commit id）
+git reflog
+
+
+
 
