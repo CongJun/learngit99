@@ -46,11 +46,20 @@ git commit -m "first commit"
 ## 查看所有产生commit的记录
 git log
 
-## 查看/创建/删除分支
+# 查看/创建/删除分支
+分支其实就是时间线；
+git中的主分支是master，master指向提交；
+HEAD指向当前分支；
+合并分支其实就是提交后将master指向新的提交；
+删除分支就是把指向该分支的指针删除掉；
+
 git branch
 git branch study
 git branch -d study
 git branch -D study
+
+## 查看分支合并情况
+git log --graph --pretty=oneline --abbrev-commit
 
 ## 查看/创建 版本
 git tag
@@ -110,5 +119,5 @@ git push -u origin study
 git push origin master
 git push origin study
 
->>>>>>> 3053e4ce81b9c318872927ca8889a3bfb9b27714
-
+# 从远程克隆一个库
+git clone git@github.com:CongJun/learngit99.git
