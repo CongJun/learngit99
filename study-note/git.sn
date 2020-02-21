@@ -25,11 +25,18 @@ git status
 git add a.md
 git add study-note
 git add .
+<<<<<<< HEAD
+=======
 
 # 删除文件
 rm test  # os
 git rm test
 git commit -m "remove test file"
+<<<<<<< HEAD
+>>>>>>> study
+=======
+>>>>>>> 3053e4ce81b9c318872927ca8889a3bfb9b27714
+>>>>>>> d89dfaf356ba7dc73f9f9a7d17b995996f11a76f
 
 ## 修改配置文件
 git config --global user.email "CJo_126@126.com"
@@ -40,14 +47,23 @@ git config -l
 ## 提交第一次修改
 git commit -m "first commit"
 
-## 查看所有产生commit的记录
+# 查看所有产生commit的记录
 git log
+## 查看分支合并情况
+git log --graph --pretty=oneline --abbrev-commit
 
-## 查看/创建/删除分支
+# 查看/创建/删除分支
+分支其实就是时间线；
+git中的主分支是master，master指向提交；
+HEAD指向当前分支；
+合并分支其实就是提交后将master指向新的提交；
+删除分支就是把指向该分支的指针删除掉；
 git branch
 git branch study
 git branch -d study
 git branch -D study
+## 切换分支也可以用switch
+git switch study
 
 ## 查看/创建 版本
 git tag
@@ -58,6 +74,11 @@ git checkout study
 git checkout v0.1
 ## 退回到文件修改前的状态
 git checkout study-note\git.sn
+<<<<<<< HEAD
+
+# 查看有哪些修改
+git  diff  study-note\git.sn
+=======
 ## 创建一个新分支并切换到该分支
 git checkout -b newbranch
 ## 丢弃工作区的修改(还没有add)
@@ -101,5 +122,25 @@ git push -u origin study
 ## 以后推送master/study分支的所有内容
 git push origin master
 git push origin study
+
+<<<<<<< HEAD
+>>>>>>> study
+
+=======
+# 从远程克隆一个库
+git clone git@github.com:CongJun/learngit99.git
+>>>>>>> d89dfaf356ba7dc73f9f9a7d17b995996f11a76f
+
+# 保存当前branch的工作现场，工作现场不能是clear的
+git stash
+git stash list
+## 恢复
+git stash apply
+git stash apply  stash@{0}
+## 删除
+git stash drop
+git stash drop  stash@{0}
+## 恢复并删除
+git stash pop
 
 
