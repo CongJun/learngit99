@@ -1,0 +1,503 @@
+----------------------=T=----------------------# {{{
+----------------------=T=----------------------# }}}
+
+----------------------=系统配置文件功能说明=----------------------# {{{
+.bashrc: 每次终端登录时读取并运用里面的设置。
+.xinitrc: 每次startx启动X界面时读取并运用里面的设置
+.xprofile: 每次使用gdm等图形登录时读取并运用里面的设置
+----------------------=系统配置文件功能说明=----------------------# }}}
+
+1、添加国内源----start/*{{{*/
+vim /etc/pacman.d/mirrorlist
+
+## aliyun
+Server = http://mirrors.aliyun.com/archlinux/$repo/os/$arch
+## 163
+Server = http://mirrors.163.com/archlinux/$repo/os/$arch
+# Tsinghua University
+Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch
+
+echo '## aliyun\nServer = http://mirrors.aliyun.com/archlinux/$repo/os/$arch' > /tmp/mrlist
+echo '## 163\nServer = http://mirrors.163.com/archlinux/$repo/os/$arch' >> /tmp/mrlist
+echo '## Tsinghua University\nServer = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch' >> /tmp/mrlist
+grep -A 1 'China' /etc/pacman.d/mirrorlist|grep -v '\-\-' >> /tmp/mrlist
+cat /etc/pacman.d/mirrorlist >> /tmp/mrlist
+mv  /etc/pacman.d/mirrorlist  /etc/pacman.d/mirrorlist.bak
+mv /tmp/mrlist /etc/pacman.d/mirrorlist
+
+中文社区仓库
+cp /etc/pacman.conf /etc/pacman.conf.backup
+vim /etc/pacman.conf
+
+[archlinuxcn]
+# The Chinese Arch Linux communities packages.
+# SigLevel = Optional TrustedOnly
+SigLevel = Optional TrustAll
+# 官方源
+#Server   = http://repo.archlinuxcn.org/$arch
+# 163源
+Server = http://mirrors.163.com/archlinux-cn/$arch
+# 清华大学
+#Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch
+
+## 注意：以上源，只能添加一个
+
+1、添加国内源----end/*}}}*/
+
+2、安装ssh并启动----start/*{{{*/
+安装
+sudo pacman -S openssh
+启动
+sudo systemctl enable sshd
+开机启动
+systemctl enable sshd.service
+重启
+systemctl restart sshd
+设置白名单
+vim /etc/ssh/sshd_config
+
+在文件的最后添加
+AllowUsers username@ipaddr
+2、安装ssh并启动----end/*}}}*/
+
+----------------------=sudo=----------------------# {{{
+/etc/bash.bashrc
+export EDITOR=/usr/bin/vim
+
+visudo
+congjun ALL=(ALL) ALL
+----------------------=sudo=----------------------# }}}
+
+----------------------=Install=----------------------# {{{
+
+3、磁盘分区划分----start
+/dev/sda1    18G
+/dev/sda2     2G
+mkfs.ext4  /dev/sda1
+mkswap  /dev/sda2 -L Swap
+swapon  /dev/sda2
+3、磁盘分区划分----end
+
+udevad  info  --name=/dev/sda
+
+pacstrap -i /mnt base base-devel linux linux-firmware vim dhcpd
+
+genfstab -U /mnt >> /mnt/etc/fstab
+arch-chroot /mnt
+ln -sf /usr/share/zoneinfo/Asia/Chongqing /etc/localtime
+hwclock  --systohc  --utc
+
+vim /etc/locale.gen
+en_US.UTF-8 UTF-8
+zh_CN.UTF-8 UTF-8 
+zh_HK.UTF-8 UTF-8 
+zh_TW.UTF-8 UTF-8 
+
+locale-gen
+locale  -a
+
+vim /etc/locale.conf
+LANG=en_US.UTF-8
+
+设置主机名
+vim /etc/hostname
+
+vim  /etc/hosts
+127.0.0.1   localhost
+::1         localhost
+127.0.1.1   myhostname.localdomain  myhostname
+
+passwd
+
+pacman  -S intel-ucode  
+pacman  -S grub
+pacman  -S os-prober  #grub检测其它已安装系统
+grub-install --target=i386-pc  /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
+
+
+----------------------=Install=----------------------# }}}
+
+----------------------Network----------------------/*{{{*/
+$ lspci -v
+02:00.0 Ethernet controller: Attansic Technology Corp. L1 Gigabit Ethernet Adapter (rev b0)
+ 	...
+ 	Kernel driver in use: atl1
+ 	Kernel modules: atl1
+$ dmesg | grep atl1
+
+# ls /sys/class/net
+
+系统启动后运行dhcpcd获取ip
+# dhcpcd
+
+# ip link
+# ip link set ens33 up/down
+
+# systemctl  status systemd-networkd
+# systemctl  start  systemd-networkd
+# systemctl  enable systemd-networkd
+# networkctl  list
+# networkctl  status
+----------------------Network----------------------/*}}}*/
+
+
+----------------------PS1----------------------# {{{
+
+\[\e[31m\]   # 定义颜色开始
+\[\e[0m\]    # 定义颜色结束
+\[\e[31m\]\u@\h\[\e[0m\]   # \u 用户名
+\[\e[34m\][\w]\[\e[0m\]    # \w 主机名
+\[\e[32m\][\A]# \[\e[0m\]  # \A 短时间
+
+# root用户提示： root@hostname[pwd] #
+PS1="\[\e[31m\]\u@\h\[\e[0m\]\[\e[34m\][\w]\[\e[0m\] # "
+# root用户提示： root@hostname[pwd][21:51] #
+PS1="\[\e[31m\]\u@\h\[\e[0m\]\[\e[34m\][\w]\[\e[0m\]\[\e[32m\][\A]# \[\e[0m\]"
+
+# root用户提示： root@hostname[pwd][21:51]# 
+PS1="\[\e[31m\]\u@\h\[\e[0m\]\[\e[34m\][\w]\[\e[0m\]\[\e[32m\][\A]# \[\e[0m\]"
+# 普通用户提示： root@hostname[pwd][21:51]$ 
+PS1="\[\e[31m\]\u@\h\[\e[0m\]\[\e[34m\][\w]\[\e[0m\]\[\e[32m\][\A]$ \[\e[0m\]"
+
+vim  /etc/bash.bashrc
+if [[ $USER = "root" ]];then
+        PS1="\[\e[31m\]\u@\h\[\e[0m\]\[\e[34m\][\w]\[\e[0m\]\[\e[32m\][\A]# \[\e[0m\]"
+                    else
+        PS1="\[\e[31m\]\u@\h\[\e[0m\]\[\e[34m\][\w]\[\e[0m\]\[\e[32m\][\A]$ \[\e[0m\]"
+fi
+
+----------------------PS1----------------------# }}}
+
+----------------------i3wm----------------------# {{{/*{{{*/
+pacman -S xorg-server
+pacman -S xorg-xinit
+pacman -S i3
+    pacman -S i3-gaps
+
+pacman -S lightdm-gtk-greeter
+cp /etc/X11/xinit/xinitrc ~/.xinitrc
+vim ~/.xinitrc
+exec i3 -V >> ~/log/i3log-$(date +'%F-%k-%M-%S') 2>&1
+# 只保留一个exec
+
+pacman -S terminator
+
+https://www.cnblogs.com/zjutlitao/p/9380485.html
+----------------------i3wm----------------------# }}}/*}}}*/
+
+----------------------font----------------------# {{{
+vim  /etc/locale.conf
+LANG=en_US.UTF-8
+## 注：这是全局locale，如果需要分用户设置，修改~/.bashrc或.xinitrc或.xprofile
+
+vim /etc/locale-gen
+en_US.UTF-8 UTF-8  
+zh_CN.UTF-8 UTF-8  
+zh_TW.UTF-8 UTF-8 
+
+## 更新完/etc/locale-gen后执行locale-gen命令使之生效
+# locale-gen
+
+mkdir /usr/share/fonts/winfonts
+cp *.ttf  /usr/share/fonts/winfonts/
+
+## 刷新字体缓存
+# fc-cache -vf
+
+## 查看系统默认字体
+# fc-match
+## 查看系统支持（安装）的字体
+# fc-match -s
+
+中文字体推荐使用：文泉驿、思源字体。安装如下：
+sudo pacman -S wqy-microhei wqy-bitmapfont wqy-zenhei wqy-microhei-lite
+sudo pacman -S adobe-source-han-sans-cn-fonts adobe-source-han-serif-cn-fonts
+
+西文字体推荐使用dejavu、noto字体。
+sudo pacman -S ttf-dejavu
+sudo pacman -S noto-fonts noto-fonts-extra noto-fonts-emoji noto-fonts-cjk
+
+Linux字体设置
+在使用winfonts之后，电脑默认中文字体编程宋体，并不是很好看，我们把它转变成文泉驿正黑。操作如下：
+mkdir ~/.config/fontconfig
+vim ~/.config/fontconfig/fonts.conf
+
+<?xml version='1.0'?>
+<!DOCTYPE fontconfig SYSTEM 'fonts.dtd'>
+<fontconfig>
+
+  <alias>
+    <family>sans-serif</family>
+    <prefer>
+	  <family>WenQuanYi Micro Hei</family>
+	  <family>WenQuanYi Zen Hei</family>
+	  <family>WenQuanYi Zen Hei Sharp</family>
+    </prefer>
+  </alias>
+
+  <alias>
+    <family>serif</family>
+    <prefer>
+      <family>WenQuanYi Micro Hei Lite</family>
+    </prefer>
+  </alias>
+
+  <alias>
+    <family>monospace</family>
+    <prefer>
+	  <family>WenQuanYi Micro Hei Mono</family>
+	  <family>WenQuanYi Zen Hei Mono</family>
+    </prefer>
+  </alias>
+
+</fontconfig>
+
+
+vim设置
+需要在~/.vimrc做如下设置：
+set fileencodings=utf8,cp936,gb18030,big5
+
+补充资料：
+locale的设定及LANG、LC_CTYPE、LC_ALL环境变量
+https://www.cnblogs.com/xlmeng1988/archive/2013/01/16/locale.html
+----------------------font----------------------# }}}
+
+----------------------=屏幕分辨率=----------------------# {{{/*{{{*/
+pacman -S extra/xorg-xrandr
+
+https://wiki.archlinux.org/index.php/Xrandr_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)
+## 查看当前配置和显示器支持的配置
+xrandr
+## 设置
+xrandr --output Virtual-1 --mode 1360x1080
+## 注：xrandr 作出的改变只在本次会话中有效
+
+## 使xrandr所更改的分辨率设置永久生效
+使xrandr定制永久生效的方案有：
+xorg.conf（推荐）
+.xprofile
+kdm/gdm
+
+/etc/X11/xorg.conf
+
+Section "Monitor"
+    Identifier      "External DVI"
+    Modeline        "1280x1024_60.00"  108.88  1280 1360 1496 1712  1024 1025 1028 1060  -HSync +Vsync
+    Option          "PreferredMode" "1280x1024_60.00"
+EndSection
+Section "Device"
+    Identifier      "ATI Technologies, Inc. M22 [Radeon Mobility M300]"
+    Driver          "ati"
+    Option          "Monitor-DVI-0" "External DVI"
+EndSection
+Section "Screen"
+    Identifier      "Primary Screen"
+    Device          "ATI Technologies, Inc. M22 [Radeon Mobility M300]"
+    DefaultDepth    24
+    SubSection "Display"
+        Depth           24
+        Modes   "1280x1024" "1024x768" "640x480"
+    EndSubSection
+EndSection
+
+Section "ServerLayout"
+        Identifier      "Default Layout"
+        Screen          "Primary Screen"
+EndSection
+----------------------=屏幕分辨率=----------------------# }}}/*}}}*/
+
+----------------------=alias=----------------------# {{{
+用户个人的别名(alias)最好保存在~/.bashrc, 而系统级的别名(这些别名会影响所有用户)存放在/etc/bash.bashrc。
+/etc/bash.bashrc
+## set alias ##
+alias ll='ls -alF'
+alias la='ls -A'
+alias vi='vim'
+alias rm='rm -i'
+alias SJ='date +%Y%m%d%H%M%S'
+----------------------=alias=----------------------# }}}
+
+----------------------=AUR=----------------------# {{{
+https://wiki.archlinux.org/index.php/Arch_User_Repository_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)#FAQ
+AUR 是什么？
+AUR 是 Arch User Repository（Arch 用户软件仓库）的缩写，是 Arch 用户上传并分享软件、共享库等等的 PKGBUILD 的地方。用户可以为喜欢的软件包投票，票数多的将有机会进入community仓库并以二进制包的形式提供。
+
+什么样的软件包能被放到 AUR？
+AUR 中的软件包仅是编译脚本，只要内容符合软件版权，满足上面提到的软件包要求，就能够放入。有时候，下载的链接具有 "you may not link" 条款，这时就不能提供下载链接，而是要用程序名称代替，用户需要用其它方式提前获取受限制的源代码。
+
+
+----------------------=AUR=----------------------# }}}
+
+----------------------=command=----------------------# {{{
+===========+ip+===========s=# {{{
+ip -s link show dev ens33
+ip -s -s link show dev ens33
+
+ip address show
+ip address add 192.168.1.100 broadcast + dev ens33
+ip address add 192.168.16.238 dev ens33 label ens33:1
+
+ip -6 address add 2000:ff04::2/64 dev eth1:11       # 接口上添加地址
+ip -6 address del 2000:ff04::2/64 dev eth1:11       # 删除接口上指定地址
+ip -6 address flush dev eth1.11                     # 删除接口上所有地址
+ip -6 address show <interface name>                 # 查看接口 ipv6 地址
+ip address show <interface name>                    # 查看接口 IP 地址，包括 4/6 2个版本的
+ip address add 192.168.1.1 broadcast +              # 设置接口地址和广播地址，+ 表示让系统自动计算
+ip address add 192.68.1.1 dev eth1 label eth1:1     # 设置接口别名，注意别和 ip link set ... name 命令混淆
+# 设置接口领域，也就是可以接受的包的范围，有下面几种：
+###   global  允许所有
+###   site    仅允许 ipv6 和本机连接
+###   link    仅允许本机连接
+###   host    仅允许内部连接（和 link 的区别还不确定有哪些）
+ip address add 10.10.1.10/24 dev ens33 label ens33:1 scope link
+ip address add 10.10.1.20/24 dev ens33 label ens33:1 scope link
+ip address del 10.10.1.10/24 dev ens33
+
+ip route show
+ip -6 route show
+ip -6 route add 2000:ff::/80 via 2000:ff04::1 dev eth1.11   # 添加一条路由
+ip -6 route add default via 2000:ff04::1 dev eth1.11        # 添加默认路由
+ip -6 route del 2000:ff04::/64                              # 删除所有相关路由表
+ip -6 route del 2000:ff04::/64 dev eth1.11                  # 删除相关接口上的路由表
+ip -6 route change 2000:ff04::/64 dev eth1.12               # 修改路由表项
+ip route add nat 192.168.10.100 via 202.6.10.1              # 添加 NAT 路由项，将 192 地址转换成 202 地址
+ip route replace default equalize nexthop via 211.139.218.145 dev eth0 weight 1 nexthop via 211.139.218.145 dev eth1 weight 1   # 添加负载均衡路由
+
+ip neighbor show                                                # 查看 ARP 表
+ip neighbor add 10.1.1.1 lladdr 0:0:0:0:0:1 dev eth0 nud permit # 添加一条 ARP 相关表项
+ip neighbor change 10.1.1.1 dev eth0 nud reachable              # 修改相关表项
+ip neighbor del 10.1.1.1 dev eth0                               # 删除一条表项
+ip neighbor flush                                               # 清除整个 ARP 表
+
+ip -s -s link show                                  # 显示所有接口详细信息
+ip -s -s link show eth1.11                          # 显示单独接口信息
+ip link set dev eth1 up                             # 启动设备，相当于 ifconfig eth1 up
+ip link set dev eth1 down                           # 停止设备，相当于 ifconfig eth1 down
+ip link set dev eth1 txqueuelen 100                 # 改变设备传输队列长度
+ip link set dev eth1 mtu 1200                       # 改变 MTU 长度
+ip link set dev eth1 address 00:00:00:AA:BB:CC      # 改变 MAC 地址
+ip link set dev eth1 name myeth                     # 接口名变更
+
+ip -t monitor dev ens33
+===========+ip+===========e=# }}}
+
+===========+systemd-analyze+===========s=# {{{
+systemd-analyze
+systemd-analyze  blame
+systemd-analyze  critical-chain
+systemd-analyze  plot > boot.svg
+  eog  boot.svg
+systemd-analyze  dump
+===========+systemd-analyze+===========e=# }}}
+
+===========++===========s=# {{{
+===========++===========e=# }}}
+----------------------=command=----------------------# }}}
+
+----------------------=Scripts=----------------------# {{{
+===========+bak.sh+===========s=# {{{
+#!/bin/bash
+/bin/cp $1 $1.$(/bin/date +%Y%m%d%H%M%S)
+===========+bak.sh+===========e=# }}}
+
+===========+promiscuous@ens33.service+===========s=# {{{
+/etc/systemd/system/promiscuous@ens33.service
+[Unit]
+Description=Set %i interface in promiscuous mode
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/ip link set dev %i promisc on
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+
+===========+promiscuous@ens33.service+===========e=# }}}
+
+===========+.sh+===========s=# {{{
+===========+.sh+===========e=# }}}
+----------------------=Scripts=----------------------# }}}
+
+----------------------=software=----------------------# {{{
+===========+chrome+===========s=# {{{
+# pacman -S extra/chromium
+===========+chrome+===========e=# }}}
+
+===========+h+===========s=# {{{
+===========+h+===========e=# }}}
+----------------------=software=----------------------# }}}
+
+----------------------=pacman=----------------------# {{{
+## Install
+pacman -S package_name1 package_name2
+
+## Install package group
+pacman -S gnome
+
+## Check which package are in the gnmon group
+pacman -Sg gnome
+
+## 下载而不安装软件包
+pacman -Sw git
+
+## 从本地安装软件包
+pacman -U name.pkg.tar.xz
+
+## Removing packages
+# To remove a single package, leaving all of its dependencies installed
+pacman -R package_name
+# To remove a package and its dependencies which are not required by any other installed package
+pacman -Rs package_name
+# To remove a package, its dependencies and all the packages that depend on target package
+pacman -Rsc package_name
+pacman -Rdd package_name
+pacman -Rn  package_name
+
+## Upgrading packages
+pacman -Syu
+
+# 列出远程包匹配的包
+pacman -Ss
+pacman -Ss wget
+# 列出远程仓库中所有包组
+pacman -Sg
+pacman -Sgg
+# 列出远程仓库中所有包
+pacman -Sl
+pacman -Sl | grep weget
+# 查看远程仓库中包的信息
+pacman -Si [package_name]
+pacman -Sii
+
+查询安装的所有包
+pacman -Q
+查询所有安装的包组
+pacman -Qg
+pacman -Ql
+# 查询安装的软件包
+pacman -Qs
+查询已安装软件包的信息
+pacman -Qi
+查询已安装软件包中文件列表
+pacman -Ql
+查询软件包中的文件是否有缺失
+pacman -Qk
+pacman -Qkk
+pacman -Qk vim
+
+# 查询一个文件属于哪个包
+pacman -Qo /etc/hosts
+
+# 查询不再作为依赖的软件包
+pacman -Qdt
+# 查询所有已安装且不被其它包依赖的软件包
+pacman -Qet
+查询远程软件包中文件列表
+pacman -Fl vim
+----------------------=pacman=----------------------# }}}
+
+----------------------=T=----------------------# {{{
+----------------------=T=----------------------# }}}

@@ -1,6 +1,17 @@
+Git是目前世界上最先进的分布式版本控制系统（没有之一）。
+Git跟踪并管理的是修改，而非文件。
+
 mkdir  d:\cjo\git
 cd  d:\cjo\git
 touch  a.md
+
+# 工作区（Working Directory）
+d:\cjo\git
+# 版本库（Repository）
+d:\cjo\git\.git
+## stage(index)：暂存区，用git add命令添加
+## master，用git commit把暂存区的所有内容添加到当前分支
+## HEAD：指向master的一个指针
 
 ## 注：在进行任何 Git 操作之前，都要先切换到 Git 仓库目录，也就是先要先切换到项目的文件夹目录下。
 
@@ -14,6 +25,14 @@ git status
 git add a.md
 git add study-note
 git add .
+<<<<<<< HEAD
+=======
+
+# 删除文件
+rm test  # os
+git rm test
+git commit -m "remove test file"
+>>>>>>> study
 
 ## 修改配置文件
 git config --global user.email "CJo_126@126.com"
@@ -42,7 +61,54 @@ git checkout study
 git checkout v0.1
 ## 退回到文件修改前的状态
 git checkout study-note\git.sn
+<<<<<<< HEAD
 
 # 查看有哪些修改
 git  diff  study-note\git.sn
+=======
+## 创建一个新分支并切换到该分支
+git checkout -b newbranch
+## 丢弃工作区的修改(还没有add)
+git checkout -- study-note\git.sn
+## 把暂存区的修改撤销掉（unstage），重新放回工作区(已add,还没有commit，没有add的无法checkout)
+git reset HEAD study-note\git.sn
+
+## 合并其他分支到master分支
+git merge
+# 注：当前分支必须是master
+
+# 查看有哪些修改
+git  diff  study-note\git.sn
+## 查看git.sn文件在工作区和版本库的区别
+git  diff  HEAD  --  study-note\git.sn
+
+# 退回到指定版本
+git  reset  --hard HEAD^
+# 注：上一个版本就是HEAD^，上上一个版本就是HEAD^^，当然往上100个版本写100个^比较容易数不过来，所以写成HEAD~100。
+git  reset  --hard commit_id
+
+# 查看执行过了每一条命令（可以查找commit id）
+git reflog
+
+
+# 生成id_rsa和id_rsa.pub
+ssh-keygen -t rsa -C "CJo_126@126.com"
+## 注：将id_rsa.pub文件的内容添加到https://github.com/中
+# 创建一个新的仓库learngit99
+
+
+# 关联一个远程库
+git remote add origin git@github.com:CongJun/learngit99.git
+origin：远程库的名字，git的默认叫法，可以更换
+CongJun：GitHub上的用户名
+learngit99：GitHub上创建的仓库（repo）
+
+# 第一次推送master/study分支的所有内容
+git push -u origin master
+git push -u origin study
+## 以后推送master/study分支的所有内容
+git push origin master
+git push origin study
+
+>>>>>>> study
 
