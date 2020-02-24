@@ -52,10 +52,7 @@ git log
 ## 查看分支合并情况
 git log --graph --pretty=oneline --abbrev-commit
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 62d790f63e0edfe6667715c282d7ee73f62739f1
 # 查看/创建/删除分支
 分支其实就是时间线；
 git中的主分支是master，master指向提交；
@@ -67,8 +64,6 @@ git branch study
 git branch -d study
 ## 如果还没有合并就删除用-D
 git branch -D study
-## 切换分支也可以用switch
-git switch study
 
 
 
@@ -120,6 +115,15 @@ git reflog
 ssh-keygen -t rsa -C "CJo_126@126.com"
 ## 注：将id_rsa.pub文件的内容添加到https://github.com/中
 # 创建一个新的仓库learngit99
+## 配置好好哦检测ssh到github的连通
+ssh -vT git@github.com
+如果返回最后有：client_loop: send disconnect: Broken pipe
+  vim  ~/.ssh/config
+  添加
+  Host *
+      ServerAliveInterval 600
+      TCPKeepAlive yes
+      IPQoS=throughput
 
 
 # 关联一个远程库
@@ -143,7 +147,6 @@ git push origin study
 git clone git@github.com:CongJun/learngit99.git
 >>>>>>> d89dfaf356ba7dc73f9f9a7d17b995996f11a76f
 
-<<<<<<< HEAD
 # 查看远程库信息
 git remote
 ## 查看具体的推送/拉取地址
@@ -151,18 +154,4 @@ git remote -v
 ## 推送具体的分支
 git push git@github.com:CongJun/learngit99.git master
 git push git@github.com:CongJun/learngit99.git study
-=======
-# 保存当前branch的工作现场，工作现场不能是clear的
-git stash
-git stash list
-## 恢复
-git stash apply
-git stash apply  stash@{0}
-## 删除
-git stash drop
-git stash drop  stash@{0}
-## 恢复并删除
-git stash pop
-
->>>>>>> 62d790f63e0edfe6667715c282d7ee73f62739f1
 
