@@ -155,3 +155,18 @@ git remote -v
 git push git@github.com:CongJun/learngit99.git master
 git push git@github.com:CongJun/learngit99.git study
 
+
+# cmder内建图形化git工具
+gitk
+
+
+c:
+mkdir c:\CJo\origin\i3wm-config
+cd c:\CJo\origin\i3wm-config
+git init
+git config --global user.email "CJo_126@126.com"
+git config --global user.name  "CongJun"
+git remote add origin git@github.com:CongJun/i3wm-config.git
+git remote -v
+git fetch origin   #可能不是必须的
+git pull origin master
