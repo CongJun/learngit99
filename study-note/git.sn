@@ -44,8 +44,10 @@ git config --global user.name  "CongJun"
 ## 查看配置信息
 git config -l
 
-## 提交第一次修改
+# 提交第一次修改
 git commit -m "first commit"
+## 追加提交，修改内容，但不想增加一个新的commit id，修改当前提交的提交信息
+git commit --amend
 
 # 查看所有产生commit的记录
 git log
@@ -78,12 +80,23 @@ git checkout v0.1
 git checkout study-note\git.sn
 <<<<<<< HEAD
 
-# 查看有哪些修改
-git  diff  study-note\git.sn
+# 查看文件f1有哪些修改
+## 查看文件f1工作区和缓冲区有什么修改
+git  diff  f1
+## 查看文件f1缓冲区和当前版本有什么区别
+git  diff  --cached
+## 查看文件f1工作区和当前版本有什么区别
+git  diff  HEAD
+## 查看文件f1两个提交版本有什么区别
+git  diff  commit_id1   commit_id2
+## 查看分支b1和工作区有什么区别
+git  diff  b1
+
+
 =======
 ## 创建一个新分支并切换到该分支
 git checkout -b newbranch
-## 丢弃工作区的修改(还没有add)
+## 丢弃工作区的修改(文件已经有过commit，后来修改还没有add)
 git checkout -- study-note\git.sn
 ## 把暂存区的修改撤销掉（unstage），重新放回工作区(已add,还没有commit，没有add的无法checkout)
 git reset HEAD study-note\git.sn
@@ -102,7 +115,7 @@ git  diff  study-note\git.sn
 ## 查看git.sn文件在工作区和版本库的区别
 git  diff  HEAD  --  study-note\git.sn
 
-# 退回到指定版本
+# 退回到指定版本（不管工作区和缓冲区是否有修改）
 git  reset  --hard HEAD^
 # 注：上一个版本就是HEAD^，上上一个版本就是HEAD^^，当然往上100个版本写100个^比较容易数不过来，所以写成HEAD~100。
 git  reset  --hard commit_id
@@ -170,3 +183,23 @@ git remote add origin git@github.com:CongJun/i3wm-config.git
 git remote -v
 git fetch origin   #可能不是必须的
 git pull origin master
+
+
+创建了文件f1，f1还未添加到缓冲区（还未执行：git add f1）
+-> touch f1
+## f1是新文件，从未提交（commit）过
+<- rm f1
+## f1已经有过commit，已经有内容你哦个，后来修改过但没有git add
+<- git restore  f1
+<- git checkout -- f1
+
+创建了文件f1，f1添加到缓冲区（执行了：git add f1）
+-> git add f1
+<- git rm --cached  f1
+<- git restore  --staged  f1
+
+git reset HEAD study-note\git.sn
+
+
+
+
