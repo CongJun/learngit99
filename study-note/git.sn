@@ -135,7 +135,9 @@ git  diff  HEAD  --  study-note\git.sn
 # --hard：移动指针，并复制文件到工作区，如没此参数则不修改工作区
 # --soft：只移动指针，不修改工作区和缓冲区。
 ## 指针不动，但将当前仓库中的内容复制到缓冲区
-git reset HEAD 
+git reset HEAD
+## 指针不动，将当前仓库中的内容复制到缓冲区和工作区
+git reset HEAD --hard
 ## 移动指针到当前指针的祖父位置，将当前仓库中的f2文件内容复制到缓冲区
 git reset HEAD~2  f2
 ##  移动指针到指定commit id位置，将commit id仓库中的文件内容复制到缓冲区
