@@ -53,6 +53,10 @@ git commit --amend
 git log
 ## 查看分支合并情况
 git log --graph --pretty=oneline --abbrev-commit
+## 查看每次提交所做的修改
+git log -p
+## 查看每次提交差异的统计信息
+git log --stat
 
 
 # 查看/创建/删除分支
@@ -73,11 +77,23 @@ git branch -D study
 git tag
 git tag v0.1
 
-# 切换分支/版本
+# checkout 用于从历史提交或缓冲区拷贝文件到工作目录，也可用于切换分支
+# checkout 快照与reset –hard的区别就是：checkout是可恢复，reset是不可恢复（后期会删除仓库中的文件，checkout不会）
+## 切换分支/版本
 git checkout study
 git checkout v0.1
-## 退回到文件修改前的状态
-git checkout study-note\git.sn
+## 创建并切换到分支b1
+git checkout -b b1
+
+## 修改了f2（f2不是新创建的文件），但还没有添加到缓冲区，取消修改
+git checkout  f2
+
+## 将HEDA指向的提交f2文件拷贝到文件目录和暂存区
+git checkout HEAD f2
+## 将HEDA指向的父提交f2文件拷贝到文件目录和暂存区
+git checkout HEAD~1 f2
+## 将某个commit id指向的f2拷贝到文件目录和暂存区
+git checkout commit_id f2
 <<<<<<< HEAD
 
 # 查看文件f1有哪些修改
@@ -115,10 +131,20 @@ git  diff  study-note\git.sn
 ## 查看git.sn文件在工作区和版本库的区别
 git  diff  HEAD  --  study-note\git.sn
 
-# 退回到指定版本（不管工作区和缓冲区是否有修改）
-git  reset  --hard HEAD^
-# 注：上一个版本就是HEAD^，上上一个版本就是HEAD^^，当然往上100个版本写100个^比较容易数不过来，所以写成HEAD~100。
-git  reset  --hard commit_id
+# 把当前分支的指针（HEAD）移动到指定位置，并且有选择的变动工作区，默认跟着修改缓冲区
+# --hard：移动指针，并复制文件到工作区，如没此参数则不修改工作区
+# --soft：只移动指针，不修改工作区和缓冲区。
+## 指针不动，但将当前仓库中的内容复制到缓冲区
+git reset HEAD 
+## 移动指针到当前指针的祖父位置，将当前仓库中的f2文件内容复制到缓冲区
+git reset HEAD~2  f2
+##  移动指针到指定commit id位置，将commit id仓库中的文件内容复制到缓冲区
+git reset commit_id
+##  移动指针到指定commit id位置，将commit id仓库中的文件内容复制到缓冲区和工作区
+git reset --hard commit_id
+##  只移动指针到指定commit id位置，不复制任何文件
+git reset --soft commit_id
+
 
 # 查看执行过了每一条命令（可以查找commit id）
 git reflog
