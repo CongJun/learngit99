@@ -1,0 +1,46 @@
+file - determine file type
+# file /bin/ls
+
+ldd - print shared library dependencies
+# ldd /bin/ls
+
+ltrace - A library call tracer
+# ltrace /bin/ls
+
+hexdump - display file contents in accii, decimal, hexadecimal, or octal.
+# hexdump -C /bin/ls
+
+strings - print the strings of printable characters in files.
+# strings /bin/ls
+
+readelf - Display information about ELF files.
+readelf -a /bin/ls
+readelf -h /bin/ls
+
+objdump - display information from object files.
+# objdump -a /bin/ls
+# objdump -d /bin/ls
+
+strace - trace system calls and signals.
+# strace -f /bin/ls
+
+nm - list symbols form object files
+
+hello.c
+#include <stdio.h>
+int main() {
+	printf("hello world!");
+	return 0;
+}
+
+# gcc -g hello.c -o hello
+# nm ./hello
+
+gdb - The GUN Debugger
+# gdb -q ./hello
+(gdb) break main
+(gdb) info break
+(gdb) run
+(gdb) bt
+(gdb) c
+(gdb) q
