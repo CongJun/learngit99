@@ -1,0 +1,82 @@
+七天精进企业篇马哥k8s    start/*{{{*/
+01-Devops核心要点及kubernetes架构概述/*{{{*/
+2020.9.20
+Ansible
+Docker
+	docker compose：单机编排
+	docker swarm：将多个docker host整合成一个逻辑的资源，compose可对这个整合过的资源编排。
+	docker machine：将一台主机初始化为docker host，并满足加入swarm集群的条件。 预处理工具。
+	以上三个是初期docker编排三剑客。
+	
+	mesos：idc的OS，把一个idc中所有的计算资源统一调度和分配。面向上层的接口不是容器接口，而只是资源分配工具，不能托管运行容器。
+	marathon：结合mesos使用，管理容器；
+
+
+DevOps，MicroServices，Blockchain
+	CI：持续集成
+	CD：持续交付，Delivery
+	CD：持续部署，Deployment
+DevOps是一种文化，一种运动，不是一种技术。
+
+kubernetes（舵手、飞行员）
+	Borg谷歌内部容器管理、编排工具。kubernetes基于Borg
+	自动装箱：实现容器的自动部署
+	自我修复：kill，restart
+	水平扩展
+	服务发现
+	负载均衡
+	自动发布和回滚
+	密钥和配置管理
+	存储编排
+	批量处理执行
+
+kubernetes就是一个集群
+	master：API Server，Scheduler，Controller-Manager
+	node：kubelet，容器引擎（docker），...
+	Pod：Label，Label Selector
+
+	有中心节点架构的集群
+	在Kubernetes上运行的最小单元是pod，pod可以理解为容器的外壳。pod容器的抽象，一个pod可以有一个或多个容器，这些容器共享一个底层的资源（UTS，Network，IPC），隔离（PID，Mount，User）资源。pod像一个虚拟机，组织容器方法，一个pod共享存储卷，一个pod内的容器都可以访问挂载在pod的存储卷。一般来讲，一个pod内只放一个容器。如果一个容器需要辅助容器（ngix和ngix的日志服务），两者结合很紧密，可以放在一个pod内。
+	为了识别pod，需要在pod上附加一些元数据。标签
+	laber selector：根据标签过滤符合条件对象的机制；
+	master/nodes
+	master（管理，2-3个就够了），nodes（work）
+	master收到客户请求，检查分析nodes上资源情况，启动容器，image从   下载
+	image可以托管在kubernetes上，kebernetes也可托管在kebernetes上
+	接收请求的只能是master，通过socket（套接字），master提供的API，API Server，接收请求，解析请求。
+	API Server
+	scheduler：观测Nodes上计算存储资源，根据请求（容器所需最低资源）
+		两级调度：1.先做预选，有多少node符合；2.优选；
+	控制器：loop，探测容器（应用）的可用性，容器（应用）出现问题向masters发出请求，重新创建容器（应用）；
+	control manager：监控控制器的健康状态，control manager冗余；
+
+
+01-Devops核心要点及kubernetes架构概述/*}}}*/
+
+02-kubernetes基础概念
+03-kubeadm初始化Kubernetes集群
+04-kubernetes应用快速入门
+05-kubernetes资源清单定义入门
+06-Kubernetes Pod控制器应用进阶
+07-Kubernetes Pod控制器应用进阶
+08-Kubernetes Pod控制器
+09-Kubernetes Pod控制器
+10-kubernetes Service资源
+11-kubernetes ingress及Ingress Controller
+12-存储卷
+13-kubernetes pv、pvc、configmap和secret
+14-kubernetes statefulset控制器
+15-kubernetes认证及serviceaccount
+16-kubernetes RBAC
+17-kubernetes dashboard认证及分级授权
+18-配置网络插件flannel
+19-基于canel的网络策略
+20-调度器、预选策略及优选函数
+21-kubernetes高级调度方式
+22-容器资源需求、资源限制及HeapSter
+23-资源指标API及自定义指标API
+24-helm入门
+25-创建自定义Chart及部署efk日志系统
+26-基于Kubernetes的PaaS概述
+七天精进企业篇马哥k8s    end/*}}}*/
+
