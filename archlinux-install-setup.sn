@@ -1,0 +1,501 @@
+# set time  ----start/*{{{*/
+timedatectl set-ntp true
+timedatectl status 
+# set time  ----end/*}}}*/
+
+# disk partition  ----start/*{{{*/
+lsblk
+parted -s /dev/sda mkpart sda1 primary 0 200M
+parted -s /dev/sda mkpart sda2 primary 0 200M
+
+pvcreate /dev/sda2
+vgcreate vg00 /dev/sda2
+lvcreate  -L 1G  -n lv_root  vg00
+lvcreate  -L 5G  -n lv_usr   vg00
+lvcreate  -L 2G  -n lv_var   vg00
+lvcreate  -L 2G  -n lv_home  vg00
+lvcreate  -L 1G  -n lv_tmp   vg00
+lvcreate  -L 2G  -n lv_swap  vg00
+
+mkfs.ext4  /dev/sda1
+mkfs.xfs  -f  /dev/vg00/lv_root
+mkfs.xfs  -f  /dev/vg00/lv_usr
+mkfs.xfs  -f  /dev/vg00/lv_var
+mkfs.xfs  -f  /dev/vg00/lv_home
+mkfs.xfs  -f  /dev/vg00/lv_tmp
+mkswap  /dev/vg00/lv_swap
+
+lvs 
+lsblk
+
+df -Th  
+
+swapon  /dev/vg00/lv_swap
+mount  /dev/vg00/lv_root  /mnt
+mkdir  -p  /mnt/{boot,usr,var,home,tmp}
+mount  /dev/sda1  /mnt/boot
+mount  /dev/vg00/lv_usr  /mnt/usr
+mount  /dev/vg00/lv_var  /mnt/var
+mount  /dev/vg00/lv_tmp  /mnt/tmp
+mount  /dev/vg00/lv_home  /mnt/home
+
+df -Th  
+
+
+# disk partition  ----end/*}}}*/
+
+# choose image source  ----start/*{{{*/
+mv /etc/pacman.d/mirrorlist  /etc/pacman.d/mirrorlist.bak
+
+echo "Server = https://mirrors.163.com/archlinux/$repo/os/$arch"  >> /etc/pacman.d/mirrorlist
+echo "Server = https://mirrors.aliyun.com/archlinux/$repo/os/$arch"  >> /etc/pacman.d/mirrorlist
+echo "" >> /etc/pacman.d/mirrorlist
+echo "" >> /etc/pacman.d/mirrorlist
+grep ^Server /etc/pacman.d/mirrorlist.bak  >> /etc/pacman.d/mirrorlist
+
+或者：
+mv /etc/pacman.d/mirrorlist  /etc/pacman.d/mirrorlist.bak
+reflector > /etc/pacman.d/mirrorlist
+
+# choose image source  ----end/*}}}*/
+
+# pacstrap install  ----start/*{{{*/
+pacstrap /mnt base base-devel linux linux-firmware lvm2 dhcpcd networkmanager vim man-db man-pages openssh sudo iwd
+# pacstrap install  ----end/*}}}*/
+
+# genfstab & chroot  ----start/*{{{*/
+genfstab -U /mnt >> /mnt/etc/fstab
+cat /mnt/etc/fstab
+arch-chroot  /mnt
+
+# genfstab & chroot  ----end/*}}}*/
+
+# Install system software & enable service ----start/*{{{*/
+pacman -S neofetch
+pacman -S xfsprogs
+pacman -S inetutils
+pacman -S ntfs-3g
+pacman -S htop
+pacman -S wget
+pacman -S xorg-xrdb
+pacman -S xorg-xrandr
+pacman -S p7zip
+
+systemctl enable dhcpcd 
+systemctl enable NetworkManager 
+systemctl enable sshd.service 
+systemctl enable iwd.service
+systemctl enable systemd-networkd.service
+systemctl enable systemd-resolved.service
+
+# Install software  ----end/*}}}*/
+
+# Character Set & time zone  ----start/*{{{*/
+
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+hwclock --systohc
+sed -i 's/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g'  /etc/locale.gen
+sed -i 's/^#zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/g'  /etc/locale.gen
+locale-gen
+echo LANG=en_US.UTF-8 >> /etc/locale.conf
+
+# Character Set & time zone  ----end/*}}}*/
+
+# set hostname  ----start/*{{{*/
+echo AlitaPC >> /etc/hostname
+
+echo "" >> /etc/hosts
+cat  >> /etc/hosts <<EOF
+127.0.0.1     localhost
+::1           localhost
+127.0.1.1     AlitaPC.localdomain    AlitaPC
+EOF
+
+# set hostname  ----end/*}}}*/
+
+# Create a user & Change the password & configure sudo ----start/*{{{*/
+useradd -m -g users -G wheel -s /bin/bash cj
+echo "root:passw0rd" | chpasswd
+echo "cj:passw0rd" | chpasswd
+
+visudo
+# %wheel ALL=(ALL)ALL
+cj  ALL=(ALL) NOPASSWD: ALL
+
+
+# Create a user & Change the password  ----end/*}}}*/
+
+# Create an initial ramdisk  ----start# {{{
+cp /etc/mkinitcpio.conf{,.bak}
+
+sed -i 's/^HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base systemd udev autodetect modconf block sd-lvm2 filesystems keyboard fsck)/g' /home/cj/tmp/mkinitcpio.conf
+
+mkinitcpio -P
+# Create an initial ramdisk  ----end# }}}
+
+# Install and configure the boot loader  ----start# {{{
+
+pacman -S grub
+grub-install  --target=i386-pc  /dev/sda
+grub-mkconfig  -o /boot/grub/grub.cfg
+
+# Install and configure the boot loader  ----end# }}}
+
+# Install an configure AUR  ----start# {{{
+
+cp  /etc/pacman.conf{,.bak}
+sed -i 's/^#\[multilib\]/\[multilib\]/g'  /etc/pacman.conf
+sed -i 's/^#Include = \/etc\/pacman.d\/mirrorlist/Include = \/etc\/pacman.d\/mirrorlist/g'  /etc/pacman.conf
+
+echo "" >> /etc/pacman.conf
+echo "[archlinuxcn]" >> /etc/pacman.conf
+echo "SigLevel = Never" >> /etc/pacman.conf
+echo "Server = https://mirrors.ustc.edu.cn/archlinuxcn/$arch" >> /etc/pacman.conf
+
+[archlinuxcn]
+SigLevel = Never
+#Server   = http://repo.archlinuxcn.org/$arch
+#Server = http://mirrors.163.com/archlinux-cn/$arch
+Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch
+
+pacman -Syy
+pacman archlinuxcn-keyring
+pacman -S yay
+yay --aururl "https://aur.tuna.tsinghua.edu.cn" --save
+
+如果在安装archlinuxcn-keyring过程中报错：
+1、检查系统时间是否正确
+timedatectl status
+timedatectl set-ntp true
+2、由于升级到了 gnupg-2.1，pacman 上游更新了密钥环的格式，这使得本地的主密钥无法签署其它密钥。这不会出问题，除非你想自定义 pacman 密钥环。不过，我们推荐所有用户都生成一个新的密钥环以解决潜在问题。此外，我们建议您安装 haveged，这是一个用来生成系统熵值的守护进程，它能加快加密软件（如 gnupg，包括生成新的密钥环）关键操作的速度。
+rm -fr /etc/pacman.d/gnupg
+pacman-key --init
+pacman-key --populate archlinux
+pacman-key --populate archlinuxcn
+
+pacman -Syy
+pacman archlinuxcn-keyring
+pacman -S yay
+
+如果还不行：
+pacman -Syu haveged
+systemctl start haveged
+systemctl enable haveged
+
+rm -fr /etc/pacman.d/gnupg
+pacman-key --init
+pacman-key --populate archlinux
+pacman-key --populate archlinuxcn
+
+pacman -Syy
+pacman archlinuxcn-keyring
+pacman -S yay
+
+# Install an configure AUR  ----  end# }}}
+
+# Install device  ----start# {{{
+neofetch
+pacman -S alsa-utils
+pacman -S intel-ucode
+pacman -S xf86-video-intel
+pacman -S bluez-libs
+
+# Install device  ----  end# }}}
+
+# title  ----start# {{{
+exit
+umount -R /mnt
+reboot
+# title  ----  end# }}}
+
+# connect network  ----start# {{{
+# iwd has been installed.
+# The iwd service is started.
+iwctl
+	device list
+	station wlan0 scan
+	station wlan0 get-networks
+	station wlan0 show
+	station wlan0 connect wifi-ssid-name
+# connect network  ----  end# }}}
+
+# font  ----start# {{{
+sudo pacman -S wqy-microhei wqy-microhei-lite wqy-bitmapfont wqy-zenhei ttf-arphic-ukai ttf-arphic-uming adobe-source-han-sans-cn-fonts adobe-source-han-serif-cn-fonts noto-fonts-cjk ttf-dejavu ttf-liberation
+fc-cache -fv
+
+Powerline fonts : 是一个字体集，本质是对一些现有的字体打 patch，把 powerline icon 字符添加到这些现有的字体里去，目前对 30 款编程字体打了 patch。
+Nerd font 的原理和 Powerline fonts 是一样的，也是针对已有的字体打 patch，把一些 icon 字符插入进去。不过 Nerd font 就比较厉害了，是一个“集大成者”，他几乎把目前市面上主流的 icon 字符全打进去了，包括上面刚刚提到的 powerline icon 字符以及 Font Awesome 等几千个 icon 字符。
+https://juejin.im/entry/6844904054322102285
+# font  ----  end# }}}
+
+# Installing the desktop evnironment  ----start# {{{
+pacman -S xorg-server
+pacman -S xfce4
+# Installing the desktop evnironment  ----  end# }}}
+
+# fcitx  ----start# {{{
+pacman -S fcitx 
+pacman -S fcitx-im 
+pacman -S fcitx-configtool
+pacman -S fcitx-googlepinyin
+
+cat ~/.xprofile << EOF
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS="@im=fcitx"
+EOF
+# fcitx  ----  end# }}}
+
+# Install the application  ----start# {{{
+#
+#======wps======## {{{
+#======wps======## }}}
+
+#======Video playback======## {{{
+pacman -S vlc
+pacman -S smplayer
+#======Video playback======## }}}
+
+#======file manager======## {{{
+pacman -S doublecmd-gtk2
+pacman -S doublecmd-qt5
+#======file manager======## }}}
+
+#======docker======## {{{
+sudo chmod a+rw /var/run/docker.sock # 非root权限使用时必须要这样做
+sudo curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+curl -sSL https://get.daocloud.io/daotools/set_mirror.sh | sh -s http://f1361db2.m.daocloud.io
+#======docker======## }}}
+
+#======Fun gadgets======## {{{
+看兰州的天气预报
+curl wttr.in/lanzhou
+
+终端艺术字
+pacman -S figlet
+echo hello | figlet
+
+使用 Telnet 观看星球大战电影的 ASCII 演绎版本
+telnet towel.blinkenlights.nl
+#======Fun gadgets======## }}}
+
+#======picom======## {{{
+终端透明渲染工具
+如果你用的是arch及其衍生发行版如manjaro，那么使用pacman安装picom,这是compton的升级版本。
+如果使用的是ubuntu，它的源里面只有compton，所以使用compton,使用apt安装
+pacman -S picom
+exec_always --no-startup-id picom 
+exec --no-startup-id picom -b --inactive-dim 0.4
+
+#======picom======## }}}
+
+#======urxvt======## {{{
+pacman -S rxvt-unicode
+
+~/.xinitrc
+xrdb -load /$HOME/.config/urxvt/.Xresources
+
+~/.config/urxvt/.Xresources
+===================File content===================
+$HOME/.config/urxvt/.Xresources
+URxvt.preeditType:Root
+!!调整此处设置输入法
+URxvt.inputMethod:fcitx
+!!颜色设置
+URxvt.depth:32
+!!中括号内数表示透明度
+URxvt.inheritPixmap:true
+URxvt.background:#000000
+URxvt.foreground:#ffffff
+URxvt.colorBD:Gray95
+URxvt.colorUL:Green
+URxvt.color1:Red2
+URxvt.color4:RoyalBlue
+URxvt.color5:Magenta2
+URxvt.color8:Gray50
+URxvt.color10:Green2
+URxvt.color12:DodgerBlue
+URxvt.color14:Cyan2
+URxvt.color15:Gray95
+!!URL操作
+URxvt.urlLauncher:chromium
+URxvt.matcher.button:1
+Urxvt.perl-ext-common:matcher
+!!滚动条设置
+URxvt.scrollBar:False
+URxvt.scrollBar_floating:False
+URxvt.scrollstyle:plain
+!!滚屏设置
+URxvt.mouseWheelScrollPage:True
+URxvt.scrollTtyOutput:False
+URxvt.scrollWithBuffer:True
+URxvt.scrollTtyKeypress:True
+!!光标闪烁
+URxvt.cursorBlink:True
+URxvt.saveLines:3000
+!!边框
+URxvt.borderLess:False
+!!字体设置
+!!Xft.dpi:96
+Xft.dpi:120
+!!URxvt.font:xft:Source Code Pro:antialias=True:pixelsize=18,xft:WenQuanYi Zen Hei:pixelsize=18
+URxvt.font:xft:Source Code Pro:antialias=True:pixelsize=24,xft:WenQuanYi Zen Hei:pixelsize=24
+!!URxvt.boldfont:xft:Source Code Pro:antialias=True:pixelsize=18,xft:WenQuanYi Zen Hei:pixelsize=18
+URxvt.boldfont:xft:Source Code Pro:antialias=True:pixelsize=24,xft:WenQuanYi Zen Hei:pixelsize=24
+===================File content===================
+
+#======urxvt======## }}}
+
+#======name======## {{{
+
+#======name======## }}}
+
+#======feh======## {{{
+pacman -S feh
+
+背景，会随机切换一张图片作为墙纸，可以配合linux的crontab 设置成每隔10分钟自动切换壁纸。
+feh --randomize --bg-fill ~/Pictures/DesktopBackground 
+exec_always --no-startup-id feh --randomize --bg-fill ~/picture/*
+
+exec_always --no-startup-id ~/scripts/.wallpic.sh
+wallpic.sh
+#!/bin/sh
+while true; do
+	find ~/picture -type f \( -name '*.jpg' -o -name '*.png' \) -print0 |
+		shuf -n1 -z | xargs -0 feh --bg-scale
+	sleep 15m
+done
+
+chmod +x wallpic.sh
+
+
+
+#======feh======## }}}
+
+#======imagemagick======## {{{
+pacman -S imagemagick
+
+convert 021.jpg -resize "1920x1080"^ -gravity center -crop 1920x1080+0+0 +repage -blur 0x16 ./021.png
+convert 019.jpg  -gravity center  /tmp/019.png
+
+
+sudo convert 003.jpg  -gravity center  +repage -blur 0x16 /usr/share/picture/003.png
+sudo convert 005.jpg  -gravity center  +repage -blur 0x16 /usr/share/picture/005.png
+sudo convert 014.jpg  -gravity center  +repage -blur 0x16 /usr/share/picture/014.png
+sudo convert 019.jpg  -gravity center  +repage -blur 0x16 /usr/share/picture/019.png
+sudo convert 020.jpg  -gravity center  +repage -blur 0x16 /usr/share/picture/020.png
+
+sudo convert 005.jpg   /usr/share/picture/020.png
+
+=+=+=+=+=+=+=+=+=+=
+mkdir -p /home/cj/picture/
+for f in /home/cj/picture/*.jpg ; do
+	OLDF=$f
+	NEWF=/home/cj/picture/.lock/$(basename $OLDF | awk -F. '{print $1}').png
+	convert $OLDF -gravity center $NEWF
+done
+##--test
+for f in /home/cj/picture/*.jpg ; do OLDF=$f; NEWF=/home/cj/picture/.lcok/$(basename $OLDF | awk -F. '{print $1}').png; echo "$OLDF  $NEWF"; done
+=+=+=+=+=+=+=+=+=+=
+
+#======imagemagick======## }}}
+
+#======name======## {{{
+
+#======name======## }}}
+
+# Install the application  ----  end# }}}
+
+# The problem  ----start# {{{
+
+1、防止x200关机夯死    start# {{{
+X200有一定几率会在关机时长时间挂起，在文字界面下可见，关机过程卡在以下地方：
+[***  ]A stop job is running for device dev-disk-by/uuid-b072209d-279a-41cd-b4b3-16eab1a84d60.device. (1min 30s)
+检查了一下fstab，发现日志中的UUID正是Swap分区的UUID，检索资料后查明是与休眠相关的参数没配置好。而此前偶有出现系统闲置时会莫名其妙卡死，疑为与自动休眠相关，自动休眠可能正触发了这个问题。
+解决方法就是修改Grub默认配置文件。用Vim打开/etc/default/grub：
+把以下参数加进GRUB_CMDLINE_LINUX_DEFAULT字段里，注意包裹在原有的引号中：
+resume=UUID=<Swap分区的UUID>
+
+最后重新生成配置文件，重启后生效：
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+1、防止x200关机夯死      end# }}}
+
+
+# The problem  ----  end# }}}
+
+# system set  ----start# {{{
+
+1、禁用蜂鸣器    start# {{{
+# 切换到Root用户下
+sudo -i
+# 卸载蜂鸣器模块
+rmmod pcspkr
+# 把蜂鸣器模块添加到黑名单中，重启即可彻底禁用之
+echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf
+1、禁用蜂鸣器      end# }}}
+
+2、关闭无线网卡节能    start# {{{
+貌似新版本内核内置的英特尔无线网卡驱动会自动打开节能模式，导致连接无线网时常常丢包。使用以下方法禁用掉节能功能。
+echo  "options iwlwifi power_save=0"  >  /etc/modprobe.d/iwlwifi.conf
+sudo modprobe -r iwlwifi
+sudo modprobe iwlwifi
+若报错重启
+2、关闭无线网卡节能      end# }}}
+
+3、用dhclient替换dhcpcd    start# {{{
+DHCPCD是Linux发行版的默认DHCP服务程序，Arch Linux的安装过程用它来提供网络支持（自动获取IP地址），但该工具在X200上工作异常，造成以下令人头疼的问题；后来查阅资料发现，是dhcpcd的锅，要把它停用，换成NetworkManager支持的另一个DHCP客户端——dhclient。
+pacman -S dhclient
+systemctl enable dhclient@.service
+systemctl disable dhcpcd
+systemctl stop  dhcpcd
+systemctl restart NetworkManager
+
+注意：
+参考资料里的论坛在介绍解决方法时，要用户打开/etc/NetworkManager/NetworkManager.conf，然后注释掉其中的dhcp=dhcpcd，并解除注释dhcp=dhclient。
+但笔者发现，在Arch Linux中，这个文件基本上是空的，只有两行注释的说明文字。再经过测试，更发现不必配置这个文件，因为NetworkManager会在dhcpcd被停用后，自动启用dhclient。
+
+3、用dhclient替换dhcpcd      end# }}}
+
+# system set  ----  end# }}}
+
+# i3wm  ----start# {{{
+
+=========<install>=========# {{{
+pacman -S xorg-server
+pacman -S lightdm
+pacman -S lightdm-gtk-greeter
+pacman -S i3
+
+systemctl enable lightdm
+
+vim  /etc/lightdm/lightdm.conf
+[LightDM]
+logind-check-graphical=true
+[Seat:*]
+user-session=/usr/bin/i3
+
+设置登录时的背景图
+vim  /etc/lightdm/lightdm-gtk-greeter.conf
+[greeter]
+background=/tmp/.lock.png
+=========<install>=========# }}}
+
+=========<i3lock>=========# {{{
+pacman -S i3lock
+
+bindsym $mod+$alt+l exec --no-startup-id "i3lock -i /usr/share/picture/lock005.jpg"
+
+=========<i3lock>=========# }}}
+
+=========<>=========# {{{
+=========<>=========# }}}
+
+# i3wm  ----  end# }}}
+
+# title  ----start# {{{
+# title  ----  end# }}}
+
+
+pacman -S --needed base-devel
+python -m http.server
