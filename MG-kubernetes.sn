@@ -53,7 +53,35 @@ kubernetes就是一个集群
 
 01-Devops核心要点及kubernetes架构概述/*}}}*/
 
-02-kubernetes基础概念
+02-kubernetes基础概念/*{{{*/
+master/node
+	master：API Server，Scheduler，Controller-Manager
+	node：kubelet，容器引擎（docker），...
+Pod：Label，Label Selector
+	Label:key=value
+	Label Selector:
+pod用控制器去管理，尽量不要手工去管理；
+Pod：
+	自主式Pod
+	控制器管理的Pod
+		ReplicatonController（早期使用）
+			监控pod，少了启，多了停；
+			滚动更新：
+				临时创建（向API Server发请求）新的pod（在更新过程中可临时超出规定数量），更新；
+				踢掉一个旧的pod，在创建一个新的pod。
+				重复以上过程，直到所有pod都更新完成。
+			支持回滚；
+		ReplicaSet，不直接使用，它有一个声明的控制器，Deployment；
+		Deployment，只能管理无状态的应用，还支持二级控制器HPA（水平pod自动伸缩控制器）；
+			HPA，Horizontal Pod Autoscaler
+		StatefulSet，管理有状态副本集
+		DaemonSet，每个node上只运行一个副本
+		Job，Ctonjob，运行作业，周期性作业
+
+
+18：00
+02-kubernetes基础概念/*}}}*/
+
 03-kubeadm初始化Kubernetes集群
 04-kubernetes应用快速入门
 05-kubernetes资源清单定义入门
