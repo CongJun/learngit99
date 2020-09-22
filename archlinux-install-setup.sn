@@ -220,6 +220,13 @@ iwctl
 # connect network  ----  end# }}}
 
 # font  ----start# {{{
+Copy Windows fonts and build font information cache files.
+mkdir /usr/share/windows/
+cp font /usr/share/windows/
+fc-cache -vf
+
+yay -S ttf-wps-fonts
+
 sudo pacman -S wqy-microhei wqy-microhei-lite wqy-bitmapfont wqy-zenhei ttf-arphic-ukai ttf-arphic-uming adobe-source-han-sans-cn-fonts adobe-source-han-serif-cn-fonts noto-fonts-cjk ttf-dejavu ttf-liberation
 fc-cache -fv
 
@@ -249,7 +256,40 @@ EOF
 # Install the application  ----start# {{{
 #
 #======wps======## {{{
+#To install the ttf-wps-fonts.
+yay -S wps-office-cn wps-office-mui-zh-cn
 #======wps======## }}}
+
+#======chrome======## {{{
+yay -S google-chrome
+#======chrome======## }}}
+
+#======Firefox======## {{{
+pacman -S firefox
+#======Firefox======## }}}
+
+#======QQ for Linux======## {{{
+yay -S linuxqq
+#======QQ for Linux======## }}}
+
+#======VirtualBox======## {{{
+yay -S virtualbox
+	choose ： 2. virturalbox-host-modules-arch
+pacman -S linux-headers
+sudo gpasswd -a $USER vboxusers
+pacman -S virtualbox-guest-dkms
+pacman -S virtualbox-guest-iso
+pacman -S virtualbox-guest-utils
+yay -S virtualbox-ext-oracle
+#======VirtualBox======## }}}
+
+#======NeteaseCloudMusic======## {{{
+yay -S netease-cloud-music
+#======NeteaseCloudMusic======## }}}
+
+#======BaiduNetDisk======## {{{
+yay -S baidunetdisk-bin
+#======BaiduNetDisk======## }}}
 
 #======Video playback======## {{{
 pacman -S vlc
@@ -262,6 +302,18 @@ pacman -S doublecmd-qt5
 #======file manager======## }}}
 
 #======docker======## {{{
+pacman -Syu docker
+#免sudo执行docker
+sudo gpasswd -a ${USER} docker
+#配置docker国内镜像
+vim  /etc/docker/daemon.json
+{
+	"registry-mirrors": ["http://hub-mirror.c.163.com"]
+}
+
+systemctl restart docker.service
+
+以下没有验证
 sudo chmod a+rw /var/run/docker.sock # 非root权限使用时必须要这样做
 sudo curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
@@ -401,9 +453,45 @@ for f in /home/cj/picture/*.jpg ; do OLDF=$f; NEWF=/home/cj/picture/.lcok/$(base
 
 #======imagemagick======## }}}
 
+#======ranger======## {{{
+Visual file manager
+pacman -S ranger
+
+#======ranger======## }}}
+
+#======fcitx======## {{{
+pacman -S fcitx-im fcitx-googlepinyin fcitx-configtool
+
+cat > ~/.xprofile << EOF
+export XIM=fcitx
+export XIM_PROGRAM=fcitx
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS="@im=fcitx"
+EOF
+
+#======fcitx======## }}}
+
+#======qv2ray======## {{{
+pacman -S qv2ray
+#======qv2ray======## }}}
+
+#======Youdo-dict======## {{{
+yay -S aur/youdao-dict
+#======Youdo-dict======## }}}
+
 #======name======## {{{
 
 #======name======## }}}
+
+#======name======## {{{
+
+#======name======## }}}
+
+#======name======## {{{
+
+#======name======## }}}
+
 
 # Install the application  ----  end# }}}
 
@@ -425,6 +513,8 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
 # The problem  ----  end# }}}
 
 # system set  ----start# {{{
+
+PS1='\[\033[31m\]\h\[\033[34m\]@\u:\[\033[0;32m\]\w\[\033[33m\]>>> \[\033[0m\]'
 
 1、禁用蜂鸣器    start# {{{
 # 切换到Root用户下
@@ -488,8 +578,22 @@ bindsym $mod+$alt+l exec --no-startup-id "i3lock -i /usr/share/picture/lock005.j
 
 =========<i3lock>=========# }}}
 
+=========<rofi>=========# {{{
+install software
+pacman -S rofi
+yay -S aur/rofi-emoji
+
+Modify the i3 configuration file ~/.config/i3/config to add the following
+bindsym $mod+d exec       --no-startup-id "rofi -combi-modi window#drun#ssh -theme solarized -font 'hack 14' -show combi -icon-theme 'Papirus' -show-icons"
+bindsym $alt+Tab exec     --no-startup-id "rofi -show window"
+bindsym ctrl+$mod+e exec  --no-startup-id "rofi -show emoji"
+
+Note: The original "Mod+d" needs to be shielded.
+=========<rofi>=========# }}}
+
 =========<>=========# {{{
 =========<>=========# }}}
+
 
 # i3wm  ----  end# }}}
 
@@ -499,3 +603,7 @@ bindsym $mod+$alt+l exec --no-startup-id "i3lock -i /usr/share/picture/lock005.j
 
 pacman -S --needed base-devel
 python -m http.server
+
+systemd-analyze
+systemd-analyze blame
+
