@@ -283,6 +283,10 @@ pacman -S virtualbox-guest-utils
 yay -S virtualbox-ext-oracle
 #======VirtualBox======## }}}
 
+#======vmware workstation======## {{{
+yay -S vmware-workstation
+#======vmware workstation======## }}}
+
 #======NeteaseCloudMusic======## {{{
 yay -S netease-cloud-music
 #======NeteaseCloudMusic======## }}}
@@ -474,6 +478,7 @@ EOF
 
 #======qv2ray======## {{{
 pacman -S qv2ray
+https://zhuanlan.zhihu.com/p/112536524
 #======qv2ray======## }}}
 
 #======Youdo-dict======## {{{
