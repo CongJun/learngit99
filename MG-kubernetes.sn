@@ -32,7 +32,7 @@ kubernetes（舵手、飞行员）
 
 kubernetes就是一个集群
 	master：API Server，Scheduler，Controller-Manager
-	node：kubelet，容器引擎（docker），...
+	node：kubelet，容器引擎（docker），kube-proxy
 	Pod：Label，Label Selector
 
 	有中心节点架构的集群
@@ -56,7 +56,7 @@ kubernetes就是一个集群
 02-kubernetes基础概念/*{{{*/
 master/node
 	master：API Server，Scheduler，Controller-Manager
-	node：kubelet，容器引擎（docker），...
+	node：kubelet，容器引擎（docker），kube-proxy
 Pod：Label，Label Selector
 	Label:key=value
 	Label Selector:
@@ -73,13 +73,59 @@ Pod：
 			支持回滚；
 		ReplicaSet，不直接使用，它有一个声明的控制器，Deployment；
 		Deployment，只能管理无状态的应用，还支持二级控制器HPA（水平pod自动伸缩控制器）；
-			HPA，Horizontal Pod Autoscaler
+			HPA，Horizontal Pod Autoscaler，
+			服务发现：k8s为同一类pod和使用他的客户端添加了中间层，这个中间层叫service（调度器，名字和ip都不变，不是程序也不是组件，是iptables的dnet规则，控制调度浏览），pod启动后service通过lable关联pod。
+
 		StatefulSet，管理有状态副本集
 		DaemonSet，每个node上只运行一个副本
 		Job，Ctonjob，运行作业，周期性作业
+定义控制器，控制器自动创建pod，手动创建service（只对集群内部服务，可对外部服务），service使用label selector通过label管理pod，k8s内部通过名称访问，所以还需要dns pod（控制器，service，一组dns pod）
 
+dnet：多目标
+LBaas：命令即负载均衡，通过命令创建负载均衡
+安装完k8s后需要部署一个dns pod（AddOns），
+AddOns（基础性架构型的pod）：附件，dns pod，监控
 
-18：00
+K8S 网络 (节点网络--> service网路（集群网络）--> pod网络)：
+	节点网络
+	service网路（集群网络）
+	pod网络
+
+K8s通信：
+	同一个Pod内的多个容器间：lo
+	各Pod之间容器的通信：用容器的IP地址直接通信
+		不允许广播
+		使用Overlay Network（叠加网络），通过隧道的方式转发二层报文，虽然跨主机好像工作在同一个二层网络中一样。可以转发二层报文，也可叠加隧道转发三层报文。在docker 0桥上配置
+	Pod与Service之间的通信：Service地址只是node上iptables规则地址，
+
+	每个node（主机）都有iptables规则。
+	容器如何访问service ip呢？
+		容器将请求发送给网关（docker 0桥地址），网关接收到请求后通过检查node上iptables 规则，知道了service的IP
+kube-proxy，每个node都有，是守护进程，随时与API Server通信。
+pod发生变化，结果保存在API Server中，API Server生成通知事件，该事件可被任何关联组件接收（其中又kube-proxy），kube-proxy接收到该事件，修改node上的iptables规则。service的管理是通过kube-proxy管理。
+
+etcd：键值存储数据库，用于保存所有对象状态信息，至少三节点。
+
+K8s至少需要5套ca证书（加密、认证）：
+1、etcd内部通信；
+2、etcd和客户端（API Server）通信，双向验证；
+3、API Server和它的客户端通信；
+4、API Server和内部集群（node）的kubelet间通信；
+5、API Server和内部集群（node）的kube-proxy间通信；
+
+k8s网络功能：
+master（至少三节点）
+etcd（至少三节点）
+node（很多节点）
+k8s通过CNI（容器网络接口）插件体系接入外部网络服务解决方案；具体解决方案以容器形式运行在k8s集群上，用容器实现网络功能；
+CNI只负责master和etcd的网络，提供网络功能（为pod，service提供ip地址），还有Network Politic功能（隔离不同的pod）；
+
+具体组件：
+1、flannel：通过叠加网络实现，只支持网络功能；
+2、calico：即支持三层隧道网路也支持bgp协议，可以通过直接路由通信。即支持网络功能，也支持network politic。但是使用难度大。
+3、canel：结合了flannel和calico。
+
+k8s名称空间：管理边界，分组不同功用的pod。pod的隔离还是需要network politic实现。
 02-kubernetes基础概念/*}}}*/
 
 03-kubeadm初始化Kubernetes集群
