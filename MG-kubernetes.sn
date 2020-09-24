@@ -128,7 +128,82 @@ CNI只负责master和etcd的网络，提供网络功能（为pod，service提供
 k8s名称空间：管理边界，分组不同功用的pod。pod的隔离还是需要network politic实现。
 02-kubernetes基础概念/*}}}*/
 
-03-kubeadm初始化Kubernetes集群
+03-kubeadm初始化Kubernetes集群/*{{{*/
+flannel 默认使用地址：10.244.0.0
+kubeanetes的部署方式：
+1、手动安装各组件，各组件以守护进程的形式运行；复杂、繁琐，全部手动。
+2、palybook，将手动工作脚本化；
+3、kubeadm工具，在每台主机上部署kubelet和docker，第一个node为master，每个组件（apiserver、schedule、controller-manager、etcd）以static pod方式部署，运行在kubelet上，剩下的节点为node节点。所有主机都有kubelet和docker，node节点上在运行kube-proxy，也是以pod形式运行。flannel也以pod形式运行，但是托管与k8s。其它组件时static pod（apiserver, schedule, controller-manager, etcd, kube-proxy）不受k8s托管。
+
+kops
+https://github.com/kubernetes/kops
+helps you create, destroy, upgrade and maintain production-grade, highly available, Kubernetes clusters from the command line. AWS (Amazon Web Services) is currently officially supported, with GCE and OpenStack in beta support, and VMware vSphere in alpha, and other platforms planned.
+
+kubeadm
+https://github.com/kubernetes/kubeadm
+Kubeadm is a tool built to provide best-practice "fast paths" for creating Kubernetes clusters. It performs the actions necessary to get a minimum viable, secure cluster up and running in a user friendly way. Kubeadm's scope is limited to the local node filesystem and the Kubernetes API, and it is intended to be a composable building block of higher level tools.
+
+kubeadm
+https://github.com/kubernetes/kubeadm/blob/master/docs/design/design_v1.10.md
+iptables.service或firewalld.service禁用。
+	1、master, nodes : 安装kubelet, kubeadm, docker
+	2、master : kubeadm init
+	3、nodes ： kubeadm join
+
+
+https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+https://mirrors.aliyun.com/kubernetes/yum/doc/
+rpm-package-key.gpg 
+yum-key.gpg
+https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+
+
+
+cd  /etc/yum.repo.d
+wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+vim kubernetes.repo
+[kubernetes]
+name=Kubernetes.Repo
+baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+gpgcheck=1
+gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg
+enabled=1
+
+检查yum源
+yum repolist
+
+wget https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg
+wget https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+rpm --import  yum-key.gpg
+rpm --import  rpm-package-key.gpg
+
+yum install docker-ce kubelet kubeadm kubectl
+
+1、启动docker服务
+vim /usr/lib/systemd/system/docker.service
+在ExecStart=/usr/bin/dockerd行前添加：
+Environment="HTTPS_PROXY=http://www.ik8s.io:10080"
+Environment="NO_PROXY=127.0.0.0/8,172.20.0.0/16"
+
+systemctl daemon-reload
+systemctl enable docker.service
+systemctl start docker.service
+docker info
+
+
+cat /proc/sys/net/bridge/bridge-nf-call-iptables
+cat /proc/sys/net/bridge/bridge-nf-call-ip6tables
+确认都为1
+
+rpm -ql kubelet
+systemctl enable kubelet
+
+2、启动kubernetes服务
+
+50:58
+
+03-kubeadm初始化Kubernetes集群/*}}}*/
+
 04-kubernetes应用快速入门
 05-kubernetes资源清单定义入门
 06-Kubernetes Pod控制器应用进阶
