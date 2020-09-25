@@ -159,7 +159,7 @@ https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 
 
 
-cd  /etc/yum.repo.d
+cd  /etc/yum.repos.d
 wget https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 vim kubernetes.repo
 [kubernetes]
@@ -198,9 +198,29 @@ cat /proc/sys/net/bridge/bridge-nf-call-ip6tables
 rpm -ql kubelet
 systemctl enable kubelet
 
+kubeadm init  --pod-network-cidr=10.244.0.0/16  --service-cidr=10.96.0.0/12
+kubeadm init --kubernetes-version=v1.11.1 --pod-network-cidr=10.244.0.0/16  --service-cidr=10.96.0.0/12
+vim  /etc/sysconfig/kubelet
+KUBELET_EXTRA_ARGS="--fail-swap-on=false"
+
+无法下载容器
+kubeadm init --image-repository registry.aliyuncs.com/google_containers  --pod-network-cidr=10.244.0.0/16  --service-cidr=10.96.0.0/12 --ignore-preflight-errors=Swap
+
+image：pause，其它容器的基础架构，提供net名称空间，为其它pod提供底层结构，不需要启动。
+
+controlplane 生成 manifest 文件，
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/confi
+
+k8s2节点的加入：
+kubeadm join 192.168.23.70:6443 --token bvneh0.5gqm9vu79uo89cmk --discovery-token-ca-cert-hash sha256:60cbe97656f5ae03eed3aba8fe743b3711e87092f6120fb57213e3013a098c92
+
 2、启动kubernetes服务
 
-50:58
+
+1:08:50
 
 03-kubeadm初始化Kubernetes集群/*}}}*/
 

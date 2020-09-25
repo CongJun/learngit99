@@ -1,0 +1,106 @@
+[root@j8s1☻ ~]# kubeadm init  --pod-network-cidr=10.244.0.0/16  --service-cidr=10.96.0.0/12
+W0925 10:24:17.850826    1355 version.go:102] could not fetch a Kubernetes version from the internet: unable to get URL "https://dl.k8s.io/release/stable-1.txt": Get "https://storage.googleapis.com/kubernetes-release/release/stable-1.txt": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+W0925 10:24:17.851422    1355 version.go:103] falling back to the local client version: v1.19.2
+W0925 10:24:17.874566    1355 configset.go:348] WARNING: kubeadm cannot validate component configs for API groups [kubelet.config.k8s.io kubeproxy.config.k8s.io]
+[init] Using Kubernetes version: v1.19.2
+[preflight] Running pre-flight checks
+        [WARNING IsDockerSystemdCheck]: detected "cgroupfs" as the Docker cgroup driver. The recommended driver is "systemd". Please follow the guide at https://kubernetes.io/docs/setup/cri/
+        [WARNING Hostname]: hostname "j8s1" could not be reached
+        [WARNING Hostname]: hostname "j8s1": lookup j8s1 on 192.168.23.2:53: no such host
+error execution phase preflight: [preflight] Some fatal errors occurred:
+        [ERROR NumCPU]: the number of available CPUs 1 is less than the required 2
+        [ERROR Swap]: running with swap on is not supported. Please disable swap
+[preflight] If you know what you are doing, you can make a check non-fatal with `--ignore-preflight-errors=...`
+To see the stack trace of this error execute with --v=5 or higher
+[root@j8s1☻ ~]# cat /etc/sysconfig/kubelet
+KUBELET_EXTRA_ARGS=
+[root@j8s1☻ ~]# 
+
+
+
+
+[root@j8s1☻ ~]# kubeadm init --image-repository registry.aliyuncs.com/google_containers  --pod-network-cidr=10.244.0.0/16  --servic
+e-cidr=10.96.0.0/12 --ignore-preflight-errors=Swap
+W0925 11:42:59.180731   15403 configset.go:348] WARNING: kubeadm cannot validate component configs for API groups [kubelet.config.k8s.io kubeproxy.config.k8s.io]
+[init] Using Kubernetes version: v1.19.2
+[preflight] Running pre-flight checks
+        [WARNING IsDockerSystemdCheck]: detected "cgroupfs" as the Docker cgroup driver. The recommended driver is "systemd". Please follow the guide at https://kubernetes.io/docs/setup/cri/
+        [WARNING Swap]: running with swap on is not supported. Please disable swap
+        [WARNING Hostname]: hostname "j8s1" could not be reached
+        [WARNING Hostname]: hostname "j8s1": lookup j8s1 on 192.168.23.2:53: no such host
+[preflight] Pulling images required for setting up a Kubernetes cluster
+[preflight] This might take a minute or two, depending on the speed of your internet connection
+[preflight] You can also perform this action in beforehand using 'kubeadm config images pull'
+[certs] Using certificateDir folder "/etc/kubernetes/pki"
+[certs] Generating "ca" certificate and key
+[certs] Generating "apiserver" certificate and key
+[certs] apiserver serving cert is signed for DNS names [j8s1 kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local] and IPs [10.96.0.1 192.168.23.70]
+[certs] Generating "apiserver-kubelet-client" certificate and key
+[certs] Generating "front-proxy-ca" certificate and key
+[certs] Generating "front-proxy-client" certificate and key
+[certs] Generating "etcd/ca" certificate and key
+[certs] Generating "etcd/server" certificate and key
+[certs] etcd/server serving cert is signed for DNS names [j8s1 localhost] and IPs [192.168.23.70 127.0.0.1 ::1]
+[certs] Generating "etcd/peer" certificate and key
+[certs] etcd/peer serving cert is signed for DNS names [j8s1 localhost] and IPs [192.168.23.70 127.0.0.1 ::1]
+[certs] Generating "etcd/healthcheck-client" certificate and key
+[certs] Generating "apiserver-etcd-client" certificate and key
+[certs] Generating "sa" key and public key
+生成配置文件
+[kubeconfig] Using kubeconfig folder "/etc/kubernetes"
+[kubeconfig] Writing "admin.conf" kubeconfig file
+[kubeconfig] Writing "kubelet.conf" kubeconfig file
+[kubeconfig] Writing "controller-manager.conf" kubeconfig file
+[kubeconfig] Writing "scheduler.conf" kubeconfig file
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Starting the kubelet
+[control-plane] Using manifest folder "/etc/kubernetes/manifests"
+[control-plane] Creating static Pod manifest for "kube-apiserver"
+[control-plane] Creating static Pod manifest for "kube-controller-manager"
+[control-plane] Creating static Pod manifest for "kube-scheduler"
+[etcd] Creating static Pod manifest for local etcd in "/etc/kubernetes/manifests"
+[wait-control-plane] Waiting for the kubelet to boot up the control plane as static Pods from directory "/etc/kubernetes/manifests". This can take up to 4m0s
+[kubelet-check] Initial timeout of 40s passed.
+[apiclient] All control plane components are healthy after 40.006322 seconds
+[upload-config] Storing the configuration used in ConfigMap "kubeadm-config" in the "kube-system" Namespace
+[kubelet] Creating a ConfigMap "kubelet-config-1.19" in namespace kube-system with the configuration for the kubelets in the cluster
+[upload-certs] Skipping phase. Please see --upload-certs
+标记该节点为主节点
+[mark-control-plane] Marking the node j8s1 as control-plane by adding the label "node-role.kubernetes.io/master=''"
+[mark-control-plane] Marking the node j8s1 as control-plane by adding the taints [node-role.kubernetes.io/master:NoSchedule]
+设置引导令牌
+[bootstrap-token] Using token: bvneh0.5gqm9vu79uo89cmk
+[bootstrap-token] Configuring bootstrap tokens, cluster-info ConfigMap, RBAC Roles
+[bootstrap-token] configured RBAC rules to allow Node Bootstrap tokens to get nodes
+[bootstrap-token] configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials
+[bootstrap-token] configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
+[bootstrap-token] configured RBAC rules to allow certificate rotation for all node client certificates in the cluster
+[bootstrap-token] Creating the "cluster-info" ConfigMap in the "kube-public" namespace
+[kubelet-finalize] Updating "/etc/kubernetes/kubelet.conf" to point to a rotatable kubelet client certificate and key
+部署两个附件
+[addons] Applied essential addon: CoreDNS
+DNS在kubernetes上进化到第三版了，第一版是siga-dns，第二版是kube-dns，第三版是CoreDNS
+[addons] Applied essential addon: kube-proxy
+1.11版后kube-proxy支持ipvs，如果没有则使用iptables。之前是iptables
+
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+运行以下命令加入节点
+kubeadm join 192.168.23.70:6443 --token bvneh0.5gqm9vu79uo89cmk \
+    --discovery-token-ca-cert-hash sha256:60cbe97656f5ae03eed3aba8fe743b3711e87092f6120fb57213e3013a098c92
+[root@j8s1☻ ~]# echo $?
+0
+[root@j8s1☻ ~]#
