@@ -212,16 +212,65 @@ controlplane 生成 manifest 文件，
 
   mkdir -p $HOME/.kube
   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-  sudo chown $(id -u):$(id -g) $HOME/.kube/confi
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+kubectl get componentstatus
+kubectl get cs
+
+[cj@j8s1☻ ~]$ kubectl get nodes
+NAME   STATUS     ROLES    AGE     VERSION
+j8s1   NotReady   master   3d12h   v1.19.2
+[cj@j8s1☻ ~]$
+NotReady的原因事没有安装网络组件flannel
+
+安装flannel
+https://github.com/coreos/flannel
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+报错：The connection to the server raw.githubusercontent.com was refused - did you specify the right host or port?
+/etc/hosts文件添加如下行
+199.232.28.133 raw.githubusercontent.com
+flannel的image也要下载下来
+docker image ls
+quay.io/coreos/flannel
+
+查看名称空间
+kubectl get ns
+[cj@j8s1☻ ~]$ kubectl get nodes
+NAME   STATUS   ROLES    AGE    VERSION
+j8s1   Ready    master   3d4h   v1.19.2
+[cj@j8s1☻ ~]$ kubectl get pods -n kube-system
+NAME                           READY   STATUS    RESTARTS   AGE
+coredns-6d56c8448f-6wp9t       1/1     Running   0          3d4h
+coredns-6d56c8448f-hcsds       1/1     Running   0          3d4h
+etcd-j8s1                      1/1     Running   5          3d4h
+kube-apiserver-j8s1            1/1     Running   5          3d4h
+kube-controller-manager-j8s1   1/1     Running   6          3d4h
+kube-flannel-ds-w5zpp          1/1     Running   0          3m28s
+kube-proxy-2qcp8               1/1     Running   0          3d4h
+kube-scheduler-j8s1            1/1     Running   5          3d4h
+[cj@j8s1☻ ~]$
+
+master节点状态为Ready后可以加入节点。
+[cj@j8s1☻ ~]$ kubectl get nodes
+NAME   STATUS   ROLES    AGE    VERSION
+j8s1   Ready    master   3d4h   v1.19.2
+[cj@j8s1☻ ~]$
 
 k8s2节点的加入：
-kubeadm join 192.168.23.70:6443 --token bvneh0.5gqm9vu79uo89cmk --discovery-token-ca-cert-hash sha256:60cbe97656f5ae03eed3aba8fe743b3711e87092f6120fb57213e3013a098c92
+/etc/sysconfig/kubectl
+kubeadm join 192.168.23.70:6443 --token bvneh0.5gqm9vu79uo89cmk --discovery-token-ca-cert-hash sha256:60cbe97656f5ae03eed3aba8fe743b3711e87092f6120fb57213e3013a098c92 --ignore-preflight-errors=Swap --v=5
+
+kubeadm join 192.168.23.70:6443 --token bvneh0.5gqm9vu79uo89cmk --discovery-token-ca-cert-hash sha256:60cbe97656f5ae03eed3aba8fe743b3711e87092f6120fb57213e3013a098c92 --image-repository registry.aliyuncs.com/google_containers  --ignore-preflight-errors=Swap 
+
+
+170
+kubeadm join 192.168.23.170:6443 --token v8dpam.dvkotqmsw0bufhdp --discovery-token-ca-cert-hash sha256:6721ea22c72723cd82ba30b0e12783e4fa1e747e10f9bf05249407848cc9fa84 --ignore-preflight-errors=Swap --v=5 
 
 2、启动kubernetes服务
 
 
 1:08:50
-
+https://www.cnblogs.com/oscarli/p/12737409.html
 03-kubeadm初始化Kubernetes集群/*}}}*/
 
 04-kubernetes应用快速入门
