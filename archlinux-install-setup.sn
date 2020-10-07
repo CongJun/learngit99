@@ -283,10 +283,6 @@ pacman -S virtualbox-guest-utils
 yay -S virtualbox-ext-oracle
 #======VirtualBox======## }}}
 
-#======vmware workstation======## {{{
-yay -S vmware-workstation
-#======vmware workstation======## }}}
-
 #======NeteaseCloudMusic======## {{{
 yay -S netease-cloud-music
 #======NeteaseCloudMusic======## }}}
@@ -478,7 +474,6 @@ EOF
 
 #======qv2ray======## {{{
 pacman -S qv2ray
-https://zhuanlan.zhihu.com/p/112536524
 #======qv2ray======## }}}
 
 #======Youdo-dict======## {{{
@@ -602,9 +597,91 @@ Note: The original "Mod+d" needs to be shielded.
 
 # i3wm  ----  end# }}}
 
+# command  ----start# {{{
+
+=========<pacman>=========# {{{
+## Install
+pacman -S package_name1 package_name2
+
+## Install package group
+pacman -S gnome
+
+## Check which package are in the gnmon group
+pacman -Sg gnome
+
+## 下载而不安装软件包
+pacman -Sw git
+
+## 从本地安装软件包
+pacman -U name.pkg.tar.xz
+
+## Removing packages
+# To remove a single package, leaving all of its dependencies installed
+pacman -R package_name
+# To remove a package and its dependencies which are not required by any other installed package
+pacman -Rs package_name
+# To remove a package, its dependencies and all the packages that depend on target package
+pacman -Rsc package_name
+pacman -Rdd package_name
+pacman -Rn  package_name
+
+## Upgrading packages
+pacman -Syu
+
+# 列出远程包匹配的包
+pacman -Ss
+pacman -Ss wget
+# 列出远程仓库中所有包组
+pacman -Sg
+pacman -Sgg
+# 列出远程仓库中所有包
+pacman -Sl
+pacman -Sl | grep weget
+# 查看远程仓库中包的信息
+pacman -Si [package_name]
+pacman -Sii
+
+查询安装的所有包
+pacman -Q
+查询所有安装的包组
+pacman -Qg
+pacman -Ql
+# 查询安装的软件包
+pacman -Qs
+查询已安装软件包的信息
+pacman -Qi
+查询已安装软件包中文件列表
+pacman -Ql
+查询软件包中的文件是否有缺失
+pacman -Qk
+pacman -Qkk
+pacman -Qk vim
+
+# 查询一个文件属于哪个包
+pacman -Qo /etc/hosts
+
+# 查询不再作为依赖的软件包
+pacman -Qdt
+# 查询所有已安装且不被其它包依赖的软件包
+pacman -Qet
+查询远程软件包中文件列表
+pacman -Fl vim
+
+清理安装包缓存
+pacman  -Scc
+清理孤立的软件包
+pacman  -Rns $(pacman -Qtdq)
+
+=========<pacman>=========# }}}
+
+=========<>=========# {{{
+=========<>=========# }}}
+
+
+# command  ----  end# }}}
+
 # title  ----start# {{{
 # title  ----  end# }}}
-
 
 pacman -S --needed base-devel
 python -m http.server
