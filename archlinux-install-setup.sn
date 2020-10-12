@@ -397,11 +397,35 @@ URxvt.font:xft:Source Code Pro:antialias=True:pixelsize=24,xft:WenQuanYi Zen Hei
 URxvt.boldfont:xft:Source Code Pro:antialias=True:pixelsize=24,xft:WenQuanYi Zen Hei:pixelsize=24
 ===================File content===================
 
+这种方式启动支持标签
+urxvt -pe tabbed
+
 #======urxvt======## }}}
 
-#======name======## {{{
+#======flameshot======## {{{
+截图工具
+将flameshot绑定至键盘的 Print 键
+bindsym Print --release exec /usr/bin/flameshot gui
+bindsym $mod+Print --release exec /usr/bin/flameshot full -d 3000
+由于 i3 是平铺式，还需要再在 i3 配置文件（同上）中配置 flameshot 窗口 floating：
+for_window [class="flameshot"] floating enable
 
+
+#======flameshot======## }}}
+
+
+#======lynis======## {{{
+扫描linux系统的安全性
+pacman -S lynis
+lynis show commands
+lynis audit system
+lynis show details TEST-ID
+#======lynis======## }}}
+
+#======name======## {{{
 #======name======## }}}
+
+
 
 #======feh======## {{{
 pacman -S feh
