@@ -54,3 +54,9 @@ df.loc['1999-11-15']
 df.loc[['1999-11-15','2019-04-01']]
 df.loc[:, '交易日期', '开盘价':'收盘价']
 
+
+
+标准差
+https://baike.baidu.com/item/%E6%A0%87%E5%87%86%E5%B7%AE
+中位数
+https://baike.baidu.com/item/%E4%B8%AD%E4%BD%8D%E6%95%B0
