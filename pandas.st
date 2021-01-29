@@ -154,9 +154,80 @@ df.loc[index, '月头'] = df['交易日期']
 
 2.5 Pandas空缺值处理/*}}}*/
 
+2.6 Pandas数据整理/*{{{*/
+排序函数
+	df.sort_values(by='收盘价', ascending=0)
+	df.sort_values(by=['交易日期', '收盘价'], ascending=[0,1])
+
+上下合并两个df
+	生成两个df
+	df1 = df.iloc[0:15][['交易日期', '股票代码', '收盘价', '成交量']]
+	df2 = df.iloc[10:25][['交易日期', '股票代码', '收盘价', '成交量']]
+
+	df3 = df1.append(df2)
+	df3 = df1.append（df2, ignore_index=True)
+
+去重
+	df3.drop_duplicates(
+		subset = ['交易日期', '股票代码'],
+		keep = 'first',  # first, last, False
+		inplace = True
+	)
+
+其他
+	df.reset_index(inplace=True, drop=True)
+	df.rename(columns = {
+		'收盘价': 'close',
+		'开盘价': 'open',
+		'股票代码': 'code',
+		'股票名称': 'name',
+		'交易日期': 'date'}, inplace = True)
+	
+	df.empty
+
+	new_df = df.DataFrame()
+
+	df.T
+
+2.6 Pandas数据整理/*}}}*/
+
+2.7 Pandas中的字符串操作/*{{{*/
+	print(df['股票代码'])
+	print(df[['股票代码', '股票名称']])
+	
+	print('sh600000'[:2]
+	print(df['交易日期'][-2:])
+	print(df['交易日期'].str[-2:])
+	
+	print(df['股票代码'].str.upper())
+	print(df['股票代码'].str.lower())
+	print(df['股票代码'].str.len())
+	df['股票代码'] = df['股票代码'] + ' '
+	df['股票代码'] = df['股票代码'].str.strip()
+	print(df['股票代码'].str.contains('find_str'))
+	
+	Print(df[['开盘价', '收盘价']].str.contains('21'))
+	AttributeError: 'DataFrame' object has no attribute 'str'
+	
+	print(df['股票代码'].str.replace('sz', 'sh'))
+	
+2.7 Pandas中的字符串操作/*}}}*/
+
+2.8 Pandas中的时间处理/*{{{*/
+
+2.8 Pandas中的时间处理/*}}}*/
+
+2.9 Pandas的滚动操作/*{{{*/
+2.9 Pandas的滚动操作/*}}}*/
+
+print(type(df['交易日期'].str[-2:]))
+<class 'pandas.core.series.Series'>
+
+print(type(df['交易日期'].str))
+<class 'pandas.core.strings.StringMethods'>
 
 question/*{{{*/
-2021-01-28-01
+2021-01-28-01/*{{{*/
 老师，这条语句只是把2019年3月1日的index保存了，如何找到所有每月1日的index？
 index = df[df['交易日期'].isin(['2019-03-01'])].index
 
@@ -173,7 +244,11 @@ for idx in index:
 line = df.shape[0]
 for idx in range(line):
 	print(df[[idx, '交易日期']])
+2021-01-28-01/*}}}*/
 
+2021-01-29-01/*{{{*/
+print(df) column和数据无法对齐？
+2021-01-29-01/*}}}*/
 question/*}}}*/
 
 
