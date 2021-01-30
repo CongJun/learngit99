@@ -214,10 +214,50 @@ df.loc[index, '月头'] = df['交易日期']
 2.7 Pandas中的字符串操作/*}}}*/
 
 2.8 Pandas中的时间处理/*{{{*/
+print(type(df))
+#-return-# : <class 'pandas.core.frame.DataFrame'>
+print(type(df['交易日期']))
+#-return-# : <class 'pandas.core.series.Series'>
+print(type(df.at[0, '交易日期']))
+#-return-# : <class 'str'>
+
+df['交易日期'] = pd_to_datatime(df['交易日期'])
+print(type(df['交易日期']))
+#-return-# : <class 'pandas._libs.tslibs.timestamps.Timestamp'>
+
+print(pd.to_datetime('2021-01-30'))
+#-return-# : 2021-01-30 00:00:00
+
+print(df['交易日期'].dt.year)
+print(df['交易日期'].dt.week)
+print(df['交易日期'].dt.dayofyear)
+print(df['交易日期'].dt.dayofweek)
+print(df['交易日期'].dt.weekday)
+print(df['交易日期'].dt.weekday_name)
+print(df['交易日期'].dt.days_in_month)
+print(df['交易日期'].dt.is_month_start)
+print(df['交易日期'].dt.is_month_end)
+
+print(df['交易日期'] + pd.Timedelta(day=1))
+print((df['交易日期'] + pd.Timedelta(day=1) -df['交易日期'])
 
 2.8 Pandas中的时间处理/*}}}*/
 
 2.9 Pandas的滚动操作/*{{{*/
+rolling操作
+	df['收盘价_3天均值'] = df['收盘价'].rolling(3).mean()
+	print(df['收盘价'].rolling(20).max())
+	print(df['收盘价'].rolling(60).min())
+	print(df['收盘价'].rolling(3).std())
+
+expanding操作
+	df['收盘价_至今均值'] = df['收盘价'].expanding().mean()
+	print(df['收盘价'].expanding().max())
+	print(df['收盘价'].expanding().min())
+	print(df['收盘价'].expanding().std())
+
+输出到本地文件
+	df.to_csv('output.csv', encoding='gbk', index=False)
 2.9 Pandas的滚动操作/*}}}*/
 
 print(type(df['交易日期'].str[-2:]))
@@ -227,6 +267,7 @@ print(type(df['交易日期'].str))
 <class 'pandas.core.strings.StringMethods'>
 
 question/*{{{*/
+
 2021-01-28-01/*{{{*/
 老师，这条语句只是把2019年3月1日的index保存了，如何找到所有每月1日的index？
 index = df[df['交易日期'].isin(['2019-03-01'])].index
@@ -249,6 +290,11 @@ for idx in range(line):
 2021-01-29-01/*{{{*/
 print(df) column和数据无法对齐？
 2021-01-29-01/*}}}*/
+
+2021-01-30-01/*{{{*/
+print(df['交易日期'].dt.weekday_name) 报错
+2021-01-30-01/*}}}*/
+
 question/*}}}*/
 
 
