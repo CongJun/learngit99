@@ -260,6 +260,48 @@ expanding操作
 	df.to_csv('output.csv', encoding='gbk', index=False)
 2.9 Pandas的滚动操作/*}}}*/
 
+3.1 Pandas批量导入数据/*{{{*/
+import pandas of pd
+import os
+
+file_location = r'D:\path\stock_data'
+
+for root, dirs, files in os.walk(file_location):
+	print('当前的目录', root)
+	print('当前目录下包含的目录', dirs)
+	print('当前目录下包含的文件', files)
+
+file_list = []
+for root, dirs, files in os.walk(file_location):
+	for filename in files:
+		if filename.endswith('csv'):
+			file_path = os.path.join(root, filename)
+			file_path = os.path.abspath(file_path)
+			file_list.append(file_path)
+all_data = pd.DataFrame()
+	for fp in sorted(file_list)[:300]:
+		df = pd.read_csv(fp, skiprow=1, encoding='gbk')
+		all_data = all_data.apped(df, ignore_index=True)
+
+all_data.to_hdf(
+	r'D:\path\a_stock.h5'
+	key='all_data')
+
+all_data.read_hdf(
+	r'D:\path\a_stock.h5'
+	key='all_data')
+3.1 Pandas批量导入数据/*}}}*/
+
+3.2 在Pandas中使用HDF/*{{{*/
+3.2 在Pandas中使用HDF/*}}}*/
+
+3.3 Pandas数据周期转换/*{{{*/
+3.3 Pandas数据周期转换/*}}}*/
+
+3.4 Pandas分组处理操作/*{{{*/
+3.4 Pandas分组处理操作/*}}}*/
+
+
 print(type(df['交易日期'].str[-2:]))
 <class 'pandas.core.series.Series'>
 
