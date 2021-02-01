@@ -293,12 +293,99 @@ all_data.read_hdf(
 3.1 Pandas批量导入数据/*}}}*/
 
 3.2 在Pandas中使用HDF/*{{{*/
+import pandas as pd
+import os
+
+pd.set_option('expand_frame_repr', False)
+
+file_list = []
+file_location = r'd:\path\filename.csv'
+
+for root, dirs, files in os.walk(file_location):
+	for filename in files:
+		if filename.endswith('.csv'):
+			file_path = os.path.join(root, filename)
+			file_path = os.path.abspath(file_path)
+			file_list.append([filename, file_path])
+
+h5_store = pd.HDFStore('a_stock_100.h5', mode='w')
+
+for filename, file_path in sorted(file_list):
+	stock_code = filename.split(',')[0]
+	df = pd.read_csv(file_path, encoding = 'gbk', skiprow = 1, parse_dates=['交易日期'])
+
+	h5_store[stock_code] = df.iloc[:300]
+	h5_store[stock_code] = df
+
+h5_store.close()
+
+h5_store = pd.HDFStore('a_stock_100.h5', mode='r')
+print(h5_store.keys())
+print(h5_store.get('sh600000'))
+print(h5_store['sh600000'])
+h5_store.close()
+
+
+
+
 3.2 在Pandas中使用HDF/*}}}*/
 
 3.3 Pandas数据周期转换/*{{{*/
+import pandas as pd
+pd.set_option('expand_frame_repr', False)
+
+df: pd.DataFrame = pd.read_hdf('a_stock_100.h5', key='sh600000')
+print(df.head(20))
+
+df.set_index('交易日期', inplace=True)
+
+rule_type = '1W'
+period_df['开盘价'] = df['开盘价'].resample(rule=rule_type).frist()
+period_df['收盘价'] = df['收盘价'].resample(rule=rule_type).last()
+period_df['最低价'] = df['最低价'].resample(rule=rule_type).min() 
+period_df['最高价'] = df['最高价'].resample(rule=rule_type).max()
+period_df['成交量'] = df['成交量'].resample(rule=rule_type).sum()
+
+period_df = period_df[['开盘价', '收盘价', '最低价', '最高价', '成交量']]
+
+
+rule_type = '1W'
+period_df = df.resample(rule=rule_type, on='交易日期', base=0, label='left', closed='left').agg(
+	{
+		'开盘价': 'first',
+		'最高价': 'max',
+		'最低价': 'min',
+		'收盘价': 'last',
+		'成交量': 'sum',
+	}
+)
+period_df = period_df[['开盘价', '收盘价', '最低价', '最高价', '成交量']]
+
+
+period_df.dropna(subset=['开盘价'], inplace=True)
+period_df = period_df[period_df['成交量'] > 0]
+
 3.3 Pandas数据周期转换/*}}}*/
 
 3.4 Pandas分组处理操作/*{{{*/
+import pandas as pd
+pd.set_option('expand_frame_repr', False)
+
+df.groupby('交易日期').size()
+df.groupby('股票代码').size()
+
+df.groupby('交易日期').get_group('2019-03-25')
+df.groupby('股票代码').get_group('sh600000')
+
+df.groupby('股票代码').describe()
+df.groupby('股票代码').get_group('sh600000').describe()
+df.groupby('股票代码').head(3)
+df.groupby('股票代码').tail(3)
+df.groupby('股票代码').first()
+df.groupby('股票代码').last()
+df.groupby('股票代码').nth(2)
+df.groupby('股票代码', as_index=False).nth(2)
+
 3.4 Pandas分组处理操作/*}}}*/
 
 
