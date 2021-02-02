@@ -455,6 +455,13 @@ ok-2021-02-02-01/*}}}*/
 没有收盘价就无法计算股票得涨跌幅。
 2021-02-02-03：股票得收盘价非常重要，为什么？/*}}}*/
 
+ok 2021-02-02-04：pandas的apply函数和labmda的用法/*{{{*/
+https://www.jianshu.com/p/4fdd6eee1b06
+DataFrame.apply函数会遍历每一个元素，对元素运行指定的function。
+
+lambda表达式是一种匿名函数，对应python中自定义函数def，是定义某个函数时比较高级的写法
+ok 2021-02-02-04：pandas的apply函数和labmda用法/*}}}*/
+
 question/*}}}*/
 
 
