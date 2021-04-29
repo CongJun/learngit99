@@ -713,3 +713,6 @@ python -m http.server
 systemd-analyze
 systemd-analyze blame
 
+扩充xfs文件系统
+lvextend -L +10G /dev/vg00/lv_usr
+xfs_growfs  /dev/vg00/lv_usr
